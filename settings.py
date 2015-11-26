@@ -2,6 +2,8 @@
 This module contains global settings for all modules.
 """
 
+#: the file in which all output will be written.
+LOG_FILE = None
 
 #: the bind address of the :class:`~queue_manager.QueueServer`
 SERVER_ADDRESS = 'localhost'
@@ -31,7 +33,7 @@ COMMAND_LIST = [
     # "hsts",
     # "resum",
     # "resum_rate",
-    # "heartbleed",
+    "heartbleed",
     # "chrome_sha1",
     # "compression",
     # "certinfo",
@@ -68,8 +70,10 @@ SHARED_SETTINGS = {
     'tlsv1_2': True,
     'tlsv1_1': True,
     'hide_rejected_ciphers': True,
-    'quiet': None, 'keypass': '',
-    'cert': None, 'timeout': 5,
+    'quiet': None,
+    'keypass': '',
+    'cert': None,
+    'timeout': 5,
     'xmpp_to': None
 }
 

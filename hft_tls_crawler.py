@@ -9,22 +9,25 @@ Just run:
 import os
 import sys
 import signal
-import time
+from datetime import datetime
 import subprocess
 from threading import Thread
 from Queue import Queue
+
+import settings
 
 #: the path to your python executable
 PYTHON_PATH = ""
 
 #: all modules in this list will be started in separate process
-MODULE_LIST = ["queue_manager.py", "input_worker.py", "sslyze_worker.py", "result_worker.py"]
+MODULE_LIST = ["queue_manager.py", "myinput_worker.py", "sslyze_worker.py", "result_worker.py"]
 
 #: the output of the modules in this list will be logged to console or to file
 LOG_MODULES = MODULE_LIST
 
 #: holds the running processes
 RUNNING_PROCESSES = []
+
 
 
 def _enqueue_out(stream, module, q):
@@ -68,6 +71,27 @@ def _sigint_handler(signum, frame):
     sys.exit()
 
 
+def _to_console(fd, module, pipe_type, msg, ts):
+    if pipe_type == "stderr":
+        color = 95
+    elif module == "queue_manager.py":
+        color = 91
+    elif module == "input_worker.py":
+        color = 94
+    elif module == "sslyze_worker.py":
+        color = 92
+    elif module == "result_worker.py":
+        color = 93
+
+    msg = "\033[%sm%s [%s]:     %s\033[0m\n" % (color, ts, module, msg)
+    fd.write(msg)
+
+
+def _to_file(fd, module, pipe_type, msg, ts):
+    msg = "%s [%s]:     %s\n" % (ts, module, msg)
+    fd.write(msg)
+
+
 def main():
     """
     Starts all modules which are listed in :data:`~hft_tls_crawler.MODULE_LIST`.
@@ -96,28 +120,19 @@ def main():
 
     print("")
 
+    #the FD in which is written.
+    if settings.LOG_FILE:
+        log_fd = open(settings.LOG_FILE, "w")
+        _write_log = _to_file
+    else:
+        log_fd = sys.stdout
+        _write_log = _to_console
+
     while True:
         line = q.get()
 
         if line[0] in LOG_MODULES:
-
-            if line[1] == "stderr":
-                color = 95
-
-            elif line[0] == "queue_manager.py":
-                color = 91
-
-            elif line[0] == "input_worker.py":
-                color = 94
-
-            elif line[0] == "sslyze_worker.py":
-                color = 92
-
-            elif line[0] == "result_worker.py":
-                color = 93
-
-            msg = "\033[%sm%s [%s]:    %s\033[0m\n" % (color, time.time(), line[0], line[2])
-            sys.stdout.write(msg)
+                _write_log(log_fd, line[0], line[1], line[2], str(datetime.now()).split('.')[0])
 
 
 if __name__ == "__main__":
