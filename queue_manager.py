@@ -53,6 +53,10 @@ class QueueManager(object):
 
         # cycle queue and keep track by counting
         hostname = self._host_queue.get()
+
+        if hostname is None:
+            return
+
         self._host_queue.put(hostname)
         self._counter += 1
         return hostname
@@ -68,6 +72,7 @@ class QueueManager(object):
         # two possibilities: emptying with a loop or garbage collection
         self._counter = 0
         self._host_source_dict = {}
+        self._host_queue.put(None)
         self._host_queue = Queue()
 
     def put_user_list(self, user_list):
@@ -89,10 +94,13 @@ class QueueManager(object):
         if len(self._host_queue.queue) > self._counter:
             return
 
+        print("adding new list ...")
         self.empty_queue()
         for item in new_list:
             self._host_source_dict[item[0]] = item[1]
             self._host_queue.put(item[0])
+
+        print("new list was added")
 
 
     def next_result(self):
