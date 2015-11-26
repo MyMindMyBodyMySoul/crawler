@@ -1,0 +1,122 @@
+{
+  "validity": {
+    "notBefore": "Nov 12 19:17:39 2015 GMT",
+    "notAfter": "Feb 10 00:00:00 2016 GMT"
+  },
+  "signatureValue": "62:ad:c0:a0:6b:6a:e9:9f:3d:28:7e:66:19:82:3b:14:c3:37:d5:c5:94:b4:6c:38:80:4c:04:cb:c7:25:be:10:ef:df:ea:70:c5:ab:af:8b:11:7f:ca:55:71:a2:db:15:4f:2c:bd:d9:c4:b7:e9:be:68:97:b8:76:90:d4:09:ec:91:fb:ab:ef:b0:2f:fa:4f:6b:95:49:0e:86:8b:6a:df:e5:4f:f2:bf:49:ab:c2:ad:d9:9e:aa:12:44:37:1c:a2:74:18:a3:0e:73:27:ab:75:f7:b0:2b:9e:c5:ac:39:b3:77:43:f8:a6:38:7d:97:f4:27:a9:dd:04:ec:bc:17:0e:42:ec:36:ef:31:71:d9:49:08:70:94:05:e8:7f:9f:e7:e9:b8:48:d1:2c:df:70:a2:4b:54:83:c4:d4:27:29:02:5a:15:a8:d7:3c:d4:ef:a0:d4:33:2a:52:0c:60:01:50:0a:24:5a:a7:bc:cc:7a:0b:88:cc:52:cb:31:de:a1:06:9d:e9:31:06:e6:12:d0:3b:80:78:09:c5:b0:5e:21:5c:18:fd:b4:9e:1b:b5:0a:23:ad:51:e7:e0:95:1e:49:37:92:60:cc:36:f6:54:41:c9:39:73:b8:43:8a:fa:bc:16:9f:48:f3:e9:80:89:6d:42:b7:da:d7:7b:f3:2b:e3:a8",
+  "issuer": {
+    "countryName": "US",
+    "organizationName": "Google Inc",
+    "commonName": "Google Internet Authority G2"
+  },
+  "serialNumber": "68CBFD25B45F0218",
+  "subjectPublicKeyInfo": {
+    "publicKey": {
+      "modulus": "00:8b:00:5c:1d:f9:5a:7e:83:cc:60:cc:32:4d:1c:ba:ad:db:05:f1:34:68:65:83:56:2e:c4:2f:21:b9:93:98:27:63:a2:d4:bc:d2:84:be:9c:7c:20:e8:be:4e:db:22:d3:a8:d0:50:65:95:7d:9d:2d:67:28:95:21:25:64:97:d3:5f:57:ef:29:4e:aa:b0:5d:71:50:96:d8:12:e1:45:b5:06:a3:a1:a6:6a:ac:1b:b0:f6:85:e7:9b:51:c3:99:c3:18:a5:4a:be:8e:ad:5f:24:a6:16:45:0c:3b:c2:22:76:a7:a7:a5:2c:2d:5e:b5:ba:12:e4:32:58:02:98:7f:a4:aa:df:9a:9c:c6:f3:81:f5:5f:31:89:79:d1:98:c7:ea:a6:64:20:a6:5f:b0:98:6c:6c:21:d2:c1:41:61:55:b9:a3:de:ec:70:12:d0:17:29:d8:77:14:aa:f3:f2:6b:89:c6:16:28:9b:ac:9c:ac:f7:81:74:04:9f:f3:a2:dc:bc:be:d8:3b:5d:15:b3:d6:eb:3b:6e:d5:72:78:c9:3a:50:1a:b9:2d:46:39:a3:08:48:53:1d:c3:b7:19:dc:71:d5:67:13:fc:36:99:d0:20:99:72:82:3c:fd:a4:a4:f4:ca:01:25:d5:e8:42:b0:f0:7a:d4:f4:6c:58:e4:5d:47:e3",
+      "exponent": "65537"
+    },
+    "publicKeyAlgorithm": "rsaEncryption",
+    "publicKeySize": "2048"
+  },
+  "version": 2,
+  "extensions": {
+    "X509v3 Subject Key Identifier": "50:A6:00:E2:63:9B:0A:C5:25:EC:16:87:E2:E7:70:B4:C0:3E:1E:10",
+    "X509v3 Extended Key Usage": {
+      "TLS Web Client Authentication": "",
+      "TLS Web Server Authentication": ""
+    },
+    "X509v3 Subject Alternative Name": {
+      "DNS": [
+        "*.google.com",
+        "*.android.com",
+        "*.appengine.google.com",
+        "*.cloud.google.com",
+        "*.google-analytics.com",
+        "*.google.ca",
+        "*.google.cl",
+        "*.google.co.in",
+        "*.google.co.jp",
+        "*.google.co.uk",
+        "*.google.com.ar",
+        "*.google.com.au",
+        "*.google.com.br",
+        "*.google.com.co",
+        "*.google.com.mx",
+        "*.google.com.tr",
+        "*.google.com.vn",
+        "*.google.de",
+        "*.google.es",
+        "*.google.fr",
+        "*.google.hu",
+        "*.google.it",
+        "*.google.nl",
+        "*.google.pl",
+        "*.google.pt",
+        "*.googleadapis.com",
+        "*.googleapis.cn",
+        "*.googlecommerce.com",
+        "*.googlevideo.com",
+        "*.gstatic.cn",
+        "*.gstatic.com",
+        "*.gvt1.com",
+        "*.gvt2.com",
+        "*.metric.gstatic.com",
+        "*.urchin.com",
+        "*.url.google.com",
+        "*.youtube-nocookie.com",
+        "*.youtube.com",
+        "*.youtubeeducation.com",
+        "*.ytimg.com",
+        "android.clients.google.com",
+        "android.com",
+        "g.co",
+        "goo.gl",
+        "google-analytics.com",
+        "google.com",
+        "googlecommerce.com",
+        "urchin.com",
+        "youtu.be",
+        "youtube.com",
+        "youtubeeducation.com"
+      ]
+    },
+    "Authority Information Access": {
+      "CAIssuers": {
+        "URI": [
+          "http://pki.google.com/GIAG2.crt"
+        ]
+      },
+      "OCSP": {
+        "URI": [
+          "http://clients1.google.com/ocsp"
+        ]
+      }
+    },
+    "X509v3 CRL Distribution Points": {
+      "Full Name": [
+        ""
+      ],
+      "URI": [
+        "http://pki.google.com/GIAG2.crl"
+      ]
+    },
+    "X509v3 Authority Key Identifier": "keyid:4A:DD:06:16:1B:BC:F6:68:B5:76:F5:81:B6:BB:62:1A:BA:5A:81:2F",
+    "X509v3 Certificate Policies": {
+      "Policy": [
+        "1.3.6.1.4.1.11129.2.5.1",
+        "2.23.140.1.2.2"
+      ]
+    },
+    "X509v3 Basic Constraints": "CA:FALSE"
+  },
+  "error": false,
+  "command": "certinfo",
+  "subject": {
+    "countryName": "US",
+    "organizationName": "Google Inc",
+    "commonName": "*.google.com",
+    "stateOrProvinceName": "California",
+    "localityName": "Mountain View"
+  },
+  "signatureAlgorithm": "sha256WithRSAEncryption"
+}

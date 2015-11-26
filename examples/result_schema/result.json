@@ -1,0 +1,24 @@
+{
+  "error": false,
+  "source": [
+    "alexa-top-1m"
+  ],
+  "target": [
+    "google.com",
+    "216.58.213.238",
+    443,
+    3
+  ],
+  "result": [
+    {
+      "command": "tlsv1_2",
+      "error": false,
+      // additional items depends on command
+    },
+    {
+      "command": "certinfo",
+      "error": false,
+      // additional items depends on command
+    }
+  ]
+}

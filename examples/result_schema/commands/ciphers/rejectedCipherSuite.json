@@ -1,0 +1,12 @@
+{
+  "SRP-DSS-AES-256-CBC-SHA": [
+    "TLS / No ciphers available",
+    null,
+    null
+  ],
+  "DHE-DSS-AES256-GCM-SHA384": [
+    "TLS / Alert handshake failure",
+    null,
+    null
+  ]
+}
