@@ -29,9 +29,11 @@ def datedAlexaCSV(date, splits):
 def getAlexaCSV():
     #downloads from url
     r = requests.get("http://s3.amazonaws.com/alexa-static/top-1m.csv.zip")
+    print("Finished downloading alexa top 1 million zip. Starting extraction...")
     #unzips
     z = zipfile.ZipFile(StringIO.StringIO(r.content))
     z.extractall()
+    print("Finished extracting alexa top 1 million zip. Sending list to queue_manager...")
     #moves file from "crawler" to "crawler/data"
     shutil.move("top-1m.csv", "data/top-1m.csv")
     #get date as "dd.mm.yyyy"
@@ -49,7 +51,7 @@ if __name__ == "__main__":
     queue_manager = c.queue_manager()
     d = getAlexaCSV()
     #host_queue.put(datedAlexaCSV(d, alexa_splits))
-    queue_manager.put_new_list(queue_manager, datedAlexaCSV(d, alexa_splits))
+    queue_manager.put_new_list(datedAlexaCSV(d, alexa_splits))
 
 
 
