@@ -37,27 +37,47 @@ class WorkerProcess(Process):
     def run(self):
         # Plugin classes are unpickled by the multiprocessing module
         # without state info. Need to assign shared_settings here
+        from plugins.PluginBase import PluginResult
         for plugin_class in self.available_commands.itervalues():
             plugin_class._shared_settings = settings.SHARED_SETTINGS
 
         while True:
+
             hostname = self._qm.next_host()
+
+            if hostname is None:
+                continue
 
             target = self._test_server(hostname)
 
             if target:
-                result_dict = dict(target=target, result=[])
+                result_dict = dict(target=target, result=[], error=False)
 
                 for command in settings.COMMAND_LIST:
                     result = self._process_command(target, command)
-                    result_dict["result"].append(result.get_raw_result())
+
+                    if isinstance(result, PluginResult):
+                        result = result.get_raw_result()
+                        if result:
+                            result["command"] = command
+                            result["error"] = False
+                        else:
+                            result = dict(error=True, err_msg="command is not supported")
+
+                    elif isinstance(result, str):
+                        result = dict(error=True, err_msg=result)
+
+                    else:
+                        result = dict(error=True, err_msg="command is not supported")
+
+                    result_dict["result"].append(result)
 
                 self._qm.put_result(result_dict)
 
     def _process_command(self, target, command):
             plugin_instance = self.available_commands[command]()
             try:  # Process the task
-                result = plugin_instance.process_task(target, command, True)
+                result = plugin_instance.process_task(target, command, "basic")
             except Exception as err:  # Generate txt and xml results
                 result = err  # TODO format exception
             return result
@@ -66,7 +86,7 @@ class WorkerProcess(Process):
         try:
             target = ServersConnectivityTester._test_server(hostname, settings.SHARED_SETTINGS)
         except InvalidTargetError as err:
-            result_dict = dict(target=(hostname, None, None), result=err.get_error_txt())
+            result_dict = dict(target=(hostname, None, None), result=err.get_error(), error=True)
             self._qm.put_result(result_dict)
             return
         return target
@@ -101,6 +121,7 @@ def main():
     ##########################
     # PROCESS INITIALIZATION #
     ##########################
+    print("starting %s sslyze worker processes ..." % settings.NUMBER_PROCESSES)
     for _ in xrange(settings.NUMBER_PROCESSES):
         p = WorkerProcess(qm, available_commands)
         p.start()

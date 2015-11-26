@@ -266,7 +266,7 @@ class PluginCertInfo(PluginBase.PluginBase):
             
         xml_output.append(ocsp_xml)
 
-        return PluginBase.PluginResult(text_output, xml_output)
+        return PluginBase.PluginResult(text_output, xml_output, x509_cert.as_dict())
 
 
     # FORMATTING FUNCTIONS

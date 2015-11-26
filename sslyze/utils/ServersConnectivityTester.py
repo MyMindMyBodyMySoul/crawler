@@ -45,6 +45,8 @@ class InvalidTargetError(Exception):
         errorXml.text = self._target_str
         return errorXml
 
+    def get_error(self):
+        return self._error_msg
 
 
 class TargetStringParser(object):

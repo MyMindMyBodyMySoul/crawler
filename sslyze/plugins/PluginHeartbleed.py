@@ -70,9 +70,11 @@ class PluginHeartbleed(PluginBase.PluginBase):
             # Server replied with our hearbeat payload
             heartbleedTxt = 'VULNERABLE - Server is vulnerable to Heartbleed'
             heartbleedXml = 'True'
+            raw = dict(vulnerable=True)
         else:
             heartbleedTxt = 'OK - Not vulnerable to Heartbleed'
             heartbleedXml = 'False'
+            raw = dict(vulnerable=False)
 
         cmdTitle = 'OpenSSL Heartbleed'
         txtOutput = [self.PLUGIN_TITLE_FORMAT(cmdTitle)]
@@ -84,7 +86,7 @@ class PluginHeartbleed(PluginBase.PluginBase):
             xmlNode = Element('openSslHeartbleed', isVulnerable=heartbleedXml)
             xmlOutput.append(xmlNode)
 
-        return PluginBase.PluginResult(txtOutput, xmlOutput)
+        return PluginBase.PluginResult(txtOutput, xmlOutput, raw)
 
 
 
