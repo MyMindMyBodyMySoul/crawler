@@ -8,6 +8,7 @@ from pymongo import MongoClient, errors
 from time import sleep
 import datetime
 from tld import get_tld
+from cipher_desc import CIPHER_DESC
 
 
 class Database(object):
@@ -22,20 +23,18 @@ class Database(object):
         self.db = self.db_client.tls_crawler
         self.coll = self.db.tls_scan_results
 
-    def insert_result(self, query, append):
+    # def insert_result(self, query, append):
+    def insert_result(self, scan):
         """
         Putting result to The Database.
-        Appends the new Scan if the given query matches an existing document.
-        Otherwise it creates a new one.
 
-        :param query: query to search for an existing document.
-        :param append: the result of the current scan.
+        :param scan: the result of the current scan.
         :return:
         """
         # retry the insert, if the connection to the database is lost
         for i in range(60):
             try:
-                self.coll.update(query, append, upsert=True)
+                self.coll.insert_one(scan)
                 break
             except errors.AutoReconnect as e:
                 print e
@@ -45,6 +44,71 @@ class Database(object):
         return
 
 
+def _parse_cert(command_result):
+    cert_dict = dict(
+        issuer=command_result['issuer']['commonName'],
+        subject=command_result['subject']['commonName'],
+        publicKeyLengh=command_result['subjectPublicKeyInfo']['publicKeySize'],
+        publicKeyAlgorithm=command_result['subjectPublicKeyInfo']['publicKeyAlgorithm'],
+        signatureAlgorithm=command_result['signatureAlgorithm'],
+        notValidBefore=command_result['validity']['notBefore'],
+        notValidAfter=command_result['validity']['notAfter'],
+        selfSigned=False,  # how can we get this value?
+        expired=False
+    )
+
+    before = datetime.datetime.strptime(command_result['validity']['notBefore'][:20], '%b %d %H:%M:%S %Y').date()
+    after = datetime.datetime.strptime(command_result['validity']['notAfter'][:20], '%b %d %H:%M:%S %Y').date()
+    now = datetime.datetime.now().date()
+
+    if not(after < now and now > before):
+        cert_dict['expired'] = True
+
+    return cert_dict
+
+def _parse_ciphers(result, protocol):
+
+    ciphers_list = []
+
+    key_status_list = [
+        ('preferredCipherSuite', 'preferred:'),
+        ('acceptedCipherSuites', 'accepted:'),
+        ('errors', 'error'),
+        ('rejectedCipherSuites', 'rejected:')
+    ]
+
+    for (result_key, result_status) in key_status_list:
+        result_list = result[result_key]
+
+        for ssl_cipher in result_list:
+
+            msg = result_list.get(ssl_cipher)[0]  # msg not used until now
+            bits = result_list.get(ssl_cipher)[1]
+            dh_info = result_list.get(ssl_cipher)[2]
+            cipher_desc = CIPHER_DESC.get(ssl_cipher)
+
+            cipher_dict = dict(
+                cipher=ssl_cipher,
+                protocol=protocol,
+                status=result_status,
+                bits=bits,
+                kx=cipher_desc.get("kx"),
+                kxStrength=0,  # don't known where to get this value when it is cert
+                au=cipher_desc.get("au"),
+                enc=cipher_desc.get("enc"),
+                mac=cipher_desc.get("mac"),
+                export=cipher_desc.get("export")
+            )
+
+            if dh_info:
+                if dh_info.get("Prime"):
+                    cipher_dict["curve"] = "P-%s" % dh_info.get("GroupSize")
+                    cipher_dict["kxStrength"] = dh_info.get("GroupSize")
+
+            ciphers_list.append(cipher_dict)
+
+    return ciphers_list
+
 def main():
     # get instance of QueueClient
     c = QueueClient()
@@ -53,51 +117,53 @@ def main():
     # get instance of Database
     mdb = Database()
 
+
+    tls_ver = ['tlsv1_2', 'tlsv1_1', 'sslv3', 'sslv2', 'tlsv1']
+
     while True:
         result = qm.next_result()
 
-        # get tld suffix. tld installed with 'pip install tld'
-        # to update the tld-names run 'update-tld-names' as discribed in https://pypi.python.org/pypi/tld
-        tld = get_tld('https://' + result["target"][0], as_object=True).suffix
+        scan_error = False
+        scan_date = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        domain = result.get("target")[0]
+        tld = get_tld('https://' + domain, as_object=True).suffix
+        source = result.get("source")
+        ciphers = []
+        certificate = {}
 
-        # fill cs_avail and cs_pref with the cipher suites of the result
-        cs_avail = []
-        cs_pref = []
-        tls_ver = ['tlsv1_2', 'tlsv1_1', 'sslv3', 'sslv2', 'tlsv1']
+        if result.get("error"):
+            print(result.get("err_msg"))
+            scan_error = True
 
-        for k in range(5):
-            if 'preferredCipherSuite' in (result['result'][k]):
-                for cs, value in ((result['result'][k])['preferredCipherSuite']).iteritems():
-                    if value[2]:
-                        cs_pref.append('{ '
-                                       'cs: ' + cs + ', tls_version: ' + tls_ver[k] +
-                                       ', dh_param : ' + value[2]['GroupSize'] + ' }')
-                    else:
-                        cs_pref.append('{ cs: ' + cs + ', tls_version: ' + tls_ver[k] + ' }')
+        else:
+            for command_result in result.get("result"):
+                if command_result.get("error"):
+                    # TODO handle error
+                    continue
+                if command_result.get("command") in tls_ver:
+                    ciphers.extend(_parse_ciphers(command_result, command_result.get("command")))
+                elif command_result["command"] == "certinfo":
+                    certificate = _parse_cert(command_result)
 
-                for cs, value in ((result['result'][k])['acceptedCipherSuites']).iteritems():
-                    if value[2]:
-                        cs_avail.append('{ cs: ' + cs + ', tls_version: ' + tls_ver[k] +
-                                        ', dh_param : ' + value[2]['GroupSize'] + ' }')
-                    else:
-                        cs_avail.append('{ cs: ' + cs + ', tls_version: ' + tls_ver[k] + ' }')
+                update_query = dict(
+                    domain=domain,
+                    tld=tld,
+                )
 
-        update_query = {
-            'domain:': result["target"][0],
-            'tld': tld,
-        }
-        # check whether a preferred cs is available. Otherwise the host was not accessible
-        if cs_pref:
-            update_add = {
-                "$addToSet": {"scans": {
-                    'date': datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-                    'source': result["source"],
-                    'cs_pref': cs_pref,
-                    'cs_avail': cs_avail,
-                }}
-            }
+                db_item = dict(
+                    scans=dict(
+                        scanError=scan_error,
+                        scanDate=scan_date,
+                        domain=domain,
+                        tld=tld,
+                        source=source,
+                        ciphers=ciphers,
+                        certificate=certificate,
+                    )
+                )
 
-            mdb.insert_result(update_query, update_add)
+        mdb.insert_result(db_item)
+
 
 if __name__ == "__main__":
     main()
