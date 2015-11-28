@@ -23,7 +23,6 @@ class Database(object):
         self.db = self.db_client.tls_crawler
         self.coll = self.db.tls_scan_results
 
-    # def insert_result(self, query, append):
     def insert_result(self, scan):
         """
         Putting result to The Database.
@@ -61,7 +60,7 @@ def _parse_cert(command_result):
     after = datetime.datetime.strptime(command_result['validity']['notAfter'][:20], '%b %d %H:%M:%S %Y').date()
     now = datetime.datetime.now().date()
 
-    if not(after < now and now > before):
+    if(after < now and now > before):
         cert_dict['expired'] = True
 
     return cert_dict
@@ -144,11 +143,6 @@ def main():
                     ciphers.extend(_parse_ciphers(command_result, command_result.get("command")))
                 elif command_result["command"] == "certinfo":
                     certificate = _parse_cert(command_result)
-
-                update_query = dict(
-                    domain=domain,
-                    tld=tld,
-                )
 
                 db_item = dict(
                     scans=dict(
