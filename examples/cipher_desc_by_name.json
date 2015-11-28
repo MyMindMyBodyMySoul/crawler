@@ -1,0 +1,1244 @@
+{
+  "DHE-RSA-AES256-SHA256": {
+    "mac": "SHA256",
+    "enc": "AES(256)",
+    "protocol": "TLSv1.2",
+    "au": "RSA",
+    "export": false,
+    "kx": "DH",
+    "cipher": "DHE-RSA-AES256-SHA256"
+  },
+  "ECDHE-ECDSA-AES128-SHA": {
+    "mac": "SHA1",
+    "enc": "AES(128)",
+    "protocol": "SSLv3",
+    "au": "ECDSA",
+    "export": false,
+    "kx": "ECDH",
+    "cipher": "ECDHE-ECDSA-AES128-SHA"
+  },
+  "ADH-AES128-SHA": {
+    "mac": "SHA1",
+    "enc": "AES(128)",
+    "protocol": "SSLv3",
+    "au": "None",
+    "export": false,
+    "kx": "DH",
+    "cipher": "ADH-AES128-SHA"
+  },
+  "ECDH-ECDSA-AES128-SHA256": {
+    "mac": "SHA256",
+    "enc": "AES(128)",
+    "protocol": "TLSv1.2",
+    "au": "ECDH",
+    "export": false,
+    "kx": "ECDH/ECDSA",
+    "cipher": "ECDH-ECDSA-AES128-SHA256"
+  },
+  "ECDH-RSA-AES256-SHA": {
+    "mac": "SHA1",
+    "enc": "AES(256)",
+    "protocol": "SSLv3",
+    "au": "ECDH",
+    "export": false,
+    "kx": "ECDH/RSA",
+    "cipher": "ECDH-RSA-AES256-SHA"
+  },
+  "ECDH-ECDSA-AES256-SHA": {
+    "mac": "SHA1",
+    "enc": "AES(256)",
+    "protocol": "SSLv3",
+    "au": "ECDH",
+    "export": false,
+    "kx": "ECDH/ECDSA",
+    "cipher": "ECDH-ECDSA-AES256-SHA"
+  },
+  "DHE-DSS-AES256-GCM-SHA384": {
+    "mac": "AEAD",
+    "enc": "AESGCM(256)",
+    "protocol": "TLSv1.2",
+    "au": "DSS",
+    "export": false,
+    "kx": "DH",
+    "cipher": "DHE-DSS-AES256-GCM-SHA384"
+  },
+  "SRP-DSS-AES-256-CBC-SHA": {
+    "mac": "SHA1",
+    "enc": "AES(256)",
+    "protocol": "SSLv3",
+    "au": "DSS",
+    "export": false,
+    "kx": "SRP",
+    "cipher": "SRP-DSS-AES-256-CBC-SHA"
+  },
+  "SRP-DSS-3DES-EDE-CBC-SHA": {
+    "mac": "SHA1",
+    "enc": "3DES(168)",
+    "protocol": "SSLv3",
+    "au": "DSS",
+    "export": false,
+    "kx": "SRP",
+    "cipher": "SRP-DSS-3DES-EDE-CBC-SHA"
+  },
+  "SRP-AES-128-CBC-SHA": {
+    "mac": "SHA1",
+    "enc": "AES(128)",
+    "protocol": "SSLv3",
+    "au": "SRP",
+    "export": false,
+    "kx": "SRP",
+    "cipher": "SRP-AES-128-CBC-SHA"
+  },
+  "ADH-AES256-SHA": {
+    "mac": "SHA1",
+    "enc": "AES(256)",
+    "protocol": "SSLv3",
+    "au": "None",
+    "export": false,
+    "kx": "DH",
+    "cipher": "ADH-AES256-SHA"
+  },
+  "ECDH-RSA-AES128-SHA256": {
+    "mac": "SHA256",
+    "enc": "AES(128)",
+    "protocol": "TLSv1.2",
+    "au": "ECDH",
+    "export": false,
+    "kx": "ECDH/RSA",
+    "cipher": "ECDH-RSA-AES128-SHA256"
+  },
+  "DHE-RSA-CAMELLIA256-SHA": {
+    "mac": "SHA1",
+    "enc": "Camellia(256)",
+    "protocol": "SSLv3",
+    "au": "RSA",
+    "export": false,
+    "kx": "DH",
+    "cipher": "DHE-RSA-CAMELLIA256-SHA"
+  },
+  "DH-DSS-DES-CBC3-SHA": {
+    "mac": "SHA1",
+    "enc": "3DES(168)",
+    "protocol": "SSLv3",
+    "au": "DH",
+    "export": false,
+    "kx": "DH/DSS",
+    "cipher": "DH-DSS-DES-CBC3-SHA"
+  },
+  "ECDH-RSA-RC4-SHA": {
+    "mac": "SHA1",
+    "enc": "RC4(128)",
+    "protocol": "SSLv3",
+    "au": "ECDH",
+    "export": false,
+    "kx": "ECDH/RSA",
+    "cipher": "ECDH-RSA-RC4-SHA"
+  },
+  "DH-RSA-AES128-SHA256": {
+    "mac": "SHA256",
+    "enc": "AES(128)",
+    "protocol": "TLSv1.2",
+    "au": "DH",
+    "export": false,
+    "kx": "DH/RSA",
+    "cipher": "DH-RSA-AES128-SHA256"
+  },
+  "SRP-RSA-AES-256-CBC-SHA": {
+    "mac": "SHA1",
+    "enc": "AES(256)",
+    "protocol": "SSLv3",
+    "au": "RSA",
+    "export": false,
+    "kx": "SRP",
+    "cipher": "SRP-RSA-AES-256-CBC-SHA"
+  },
+  "DHE-RSA-CAMELLIA128-SHA": {
+    "mac": "SHA1",
+    "enc": "Camellia(128)",
+    "protocol": "SSLv3",
+    "au": "RSA",
+    "export": false,
+    "kx": "DH",
+    "cipher": "DHE-RSA-CAMELLIA128-SHA"
+  },
+  "DES-CBC-SHA": {
+    "mac": "SHA1",
+    "enc": "DES(56)",
+    "protocol": "SSLv3",
+    "au": "RSA",
+    "export": false,
+    "kx": "RSA",
+    "cipher": "DES-CBC-SHA"
+  },
+  "ECDHE-ECDSA-AES256-GCM-SHA384": {
+    "mac": "AEAD",
+    "enc": "AESGCM(256)",
+    "protocol": "TLSv1.2",
+    "au": "ECDSA",
+    "export": false,
+    "kx": "ECDH",
+    "cipher": "ECDHE-ECDSA-AES256-GCM-SHA384"
+  },
+  "DES-CBC3-SHA": {
+    "mac": "SHA1",
+    "enc": "3DES(168)",
+    "protocol": "SSLv3",
+    "au": "RSA",
+    "export": false,
+    "kx": "RSA",
+    "cipher": "DES-CBC3-SHA"
+  },
+  "ECDHE-ECDSA-RC4-SHA": {
+    "mac": "SHA1",
+    "enc": "RC4(128)",
+    "protocol": "SSLv3",
+    "au": "ECDSA",
+    "export": false,
+    "kx": "ECDH",
+    "cipher": "ECDHE-ECDSA-RC4-SHA"
+  },
+  "IDEA-CBC-MD5": {
+    "mac": "MD5",
+    "enc": "IDEA(128)",
+    "protocol": "SSLv2",
+    "au": "RSA",
+    "export": false,
+    "kx": "RSA",
+    "cipher": "IDEA-CBC-MD5"
+  },
+  "RC2-CBC-MD5": {
+    "mac": "MD5",
+    "enc": "RC2(128)",
+    "protocol": "SSLv2",
+    "au": "RSA",
+    "export": false,
+    "kx": "RSA",
+    "cipher": "RC2-CBC-MD5"
+  },
+  "DH-RSA-CAMELLIA128-SHA": {
+    "mac": "SHA1",
+    "enc": "Camellia(128)",
+    "protocol": "SSLv3",
+    "au": "DH",
+    "export": false,
+    "kx": "DH/RSA",
+    "cipher": "DH-RSA-CAMELLIA128-SHA"
+  },
+  "ECDH-ECDSA-NULL-SHA": {
+    "mac": "SHA1",
+    "enc": "None",
+    "protocol": "SSLv3",
+    "au": "ECDH",
+    "export": false,
+    "kx": "ECDH/ECDSA",
+    "cipher": "ECDH-ECDSA-NULL-SHA"
+  },
+  "PSK-3DES-EDE-CBC-SHA": {
+    "mac": "SHA1",
+    "enc": "3DES(168)",
+    "protocol": "SSLv3",
+    "au": "PSK",
+    "export": false,
+    "kx": "PSK",
+    "cipher": "PSK-3DES-EDE-CBC-SHA"
+  },
+  "ECDHE-RSA-AES128-SHA": {
+    "mac": "SHA1",
+    "enc": "AES(128)",
+    "protocol": "SSLv3",
+    "au": "RSA",
+    "export": false,
+    "kx": "ECDH",
+    "cipher": "ECDHE-RSA-AES128-SHA"
+  },
+  "DH-DSS-AES256-GCM-SHA384": {
+    "mac": "AEAD",
+    "enc": "AESGCM(256)",
+    "protocol": "TLSv1.2",
+    "au": "DH",
+    "export": false,
+    "kx": "DH/DSS",
+    "cipher": "DH-DSS-AES256-GCM-SHA384"
+  },
+  "ADH-RC4-MD5": {
+    "mac": "MD5",
+    "enc": "RC4(128)",
+    "protocol": "SSLv3",
+    "au": "None",
+    "export": false,
+    "kx": "DH",
+    "cipher": "ADH-RC4-MD5"
+  },
+  "DH-RSA-AES256-SHA256": {
+    "mac": "SHA256",
+    "enc": "AES(256)",
+    "protocol": "TLSv1.2",
+    "au": "DH",
+    "export": false,
+    "kx": "DH/RSA",
+    "cipher": "DH-RSA-AES256-SHA256"
+  },
+  "SRP-RSA-3DES-EDE-CBC-SHA": {
+    "mac": "SHA1",
+    "enc": "3DES(168)",
+    "protocol": "SSLv3",
+    "au": "RSA",
+    "export": false,
+    "kx": "SRP",
+    "cipher": "SRP-RSA-3DES-EDE-CBC-SHA"
+  },
+  "ECDHE-RSA-AES256-SHA": {
+    "mac": "SHA1",
+    "enc": "AES(256)",
+    "protocol": "SSLv3",
+    "au": "RSA",
+    "export": false,
+    "kx": "ECDH",
+    "cipher": "ECDHE-RSA-AES256-SHA"
+  },
+  "AES256-SHA256": {
+    "mac": "SHA256",
+    "enc": "AES(256)",
+    "protocol": "TLSv1.2",
+    "au": "RSA",
+    "export": false,
+    "kx": "RSA",
+    "cipher": "AES256-SHA256"
+  },
+  "SEED-SHA": {
+    "mac": "SHA1",
+    "enc": "SEED(128)",
+    "protocol": "SSLv3",
+    "au": "RSA",
+    "export": false,
+    "kx": "RSA",
+    "cipher": "SEED-SHA"
+  },
+  "EDH-RSA-DES-CBC-SHA": {
+    "mac": "SHA1",
+    "enc": "DES(56)",
+    "protocol": "SSLv3",
+    "au": "RSA",
+    "export": false,
+    "kx": "DH",
+    "cipher": "EDH-RSA-DES-CBC-SHA"
+  },
+  "CAMELLIA256-SHA": {
+    "mac": "SHA1",
+    "enc": "Camellia(256)",
+    "protocol": "SSLv3",
+    "au": "RSA",
+    "export": false,
+    "kx": "RSA",
+    "cipher": "CAMELLIA256-SHA"
+  },
+  "DHE-DSS-AES256-SHA256": {
+    "mac": "SHA256",
+    "enc": "AES(256)",
+    "protocol": "TLSv1.2",
+    "au": "DSS",
+    "export": false,
+    "kx": "DH",
+    "cipher": "DHE-DSS-AES256-SHA256"
+  },
+  "ADH-AES256-SHA256": {
+    "mac": "SHA256",
+    "enc": "AES(256)",
+    "protocol": "TLSv1.2",
+    "au": "None",
+    "export": false,
+    "kx": "DH",
+    "cipher": "ADH-AES256-SHA256"
+  },
+  "ECDHE-RSA-DES-CBC3-SHA": {
+    "mac": "SHA1",
+    "enc": "3DES(168)",
+    "protocol": "SSLv3",
+    "au": "RSA",
+    "export": false,
+    "kx": "ECDH",
+    "cipher": "ECDHE-RSA-DES-CBC3-SHA"
+  },
+  "ECDHE-RSA-AES256-SHA384": {
+    "mac": "SHA384",
+    "enc": "AES(256)",
+    "protocol": "TLSv1.2",
+    "au": "RSA",
+    "export": false,
+    "kx": "ECDH",
+    "cipher": "ECDHE-RSA-AES256-SHA384"
+  },
+  "ECDH-RSA-AES256-SHA384": {
+    "mac": "SHA384",
+    "enc": "AES(256)",
+    "protocol": "TLSv1.2",
+    "au": "ECDH",
+    "export": false,
+    "kx": "ECDH/RSA",
+    "cipher": "ECDH-RSA-AES256-SHA384"
+  },
+  "EXP-EDH-DSS-DES-CBC-SHA": {
+    "mac": "SHA1",
+    "enc": "DES(40)",
+    "protocol": "SSLv3",
+    "au": "DSS",
+    "export": true,
+    "kx": "DH(512)",
+    "cipher": "EXP-EDH-DSS-DES-CBC-SHA"
+  },
+  "ECDH-ECDSA-AES128-GCM-SHA256": {
+    "mac": "AEAD",
+    "enc": "AESGCM(128)",
+    "protocol": "TLSv1.2",
+    "au": "ECDH",
+    "export": false,
+    "kx": "ECDH/ECDSA",
+    "cipher": "ECDH-ECDSA-AES128-GCM-SHA256"
+  },
+  "ECDHE-ECDSA-DES-CBC3-SHA": {
+    "mac": "SHA1",
+    "enc": "3DES(168)",
+    "protocol": "SSLv3",
+    "au": "ECDSA",
+    "export": false,
+    "kx": "ECDH",
+    "cipher": "ECDHE-ECDSA-DES-CBC3-SHA"
+  },
+  "ADH-DES-CBC-SHA": {
+    "mac": "SHA1",
+    "enc": "DES(56)",
+    "protocol": "SSLv3",
+    "au": "None",
+    "export": false,
+    "kx": "DH",
+    "cipher": "ADH-DES-CBC-SHA"
+  },
+  "DH-RSA-AES128-SHA": {
+    "mac": "SHA1",
+    "enc": "AES(128)",
+    "protocol": "SSLv3",
+    "au": "DH",
+    "export": false,
+    "kx": "DH/RSA",
+    "cipher": "DH-RSA-AES128-SHA"
+  },
+  "SRP-3DES-EDE-CBC-SHA": {
+    "mac": "SHA1",
+    "enc": "3DES(168)",
+    "protocol": "SSLv3",
+    "au": "SRP",
+    "export": false,
+    "kx": "SRP",
+    "cipher": "SRP-3DES-EDE-CBC-SHA"
+  },
+  "NULL-SHA256": {
+    "mac": "SHA256",
+    "enc": "None",
+    "protocol": "TLSv1.2",
+    "au": "RSA",
+    "export": false,
+    "kx": "RSA",
+    "cipher": "NULL-SHA256"
+  },
+  "PSK-AES128-CBC-SHA": {
+    "mac": "SHA1",
+    "enc": "AES(128)",
+    "protocol": "SSLv3",
+    "au": "PSK",
+    "export": false,
+    "kx": "PSK",
+    "cipher": "PSK-AES128-CBC-SHA"
+  },
+  "EXP-RC2-CBC-MD5": {
+    "mac": "MD5",
+    "enc": "RC2(40)",
+    "protocol": "SSLv2",
+    "au": "RSA",
+    "export": true,
+    "kx": "RSA(512)",
+    "cipher": "EXP-RC2-CBC-MD5"
+  },
+  "DH-RSA-AES128-GCM-SHA256": {
+    "mac": "AEAD",
+    "enc": "AESGCM(128)",
+    "protocol": "TLSv1.2",
+    "au": "DH",
+    "export": false,
+    "kx": "DH/RSA",
+    "cipher": "DH-RSA-AES128-GCM-SHA256"
+  },
+  "ECDHE-ECDSA-AES256-SHA384": {
+    "mac": "SHA384",
+    "enc": "AES(256)",
+    "protocol": "TLSv1.2",
+    "au": "ECDSA",
+    "export": false,
+    "kx": "ECDH",
+    "cipher": "ECDHE-ECDSA-AES256-SHA384"
+  },
+  "DH-DSS-AES128-SHA": {
+    "mac": "SHA1",
+    "enc": "AES(128)",
+    "protocol": "SSLv3",
+    "au": "DH",
+    "export": false,
+    "kx": "DH/DSS",
+    "cipher": "DH-DSS-AES128-SHA"
+  },
+  "DHE-DSS-CAMELLIA256-SHA": {
+    "mac": "SHA1",
+    "enc": "Camellia(256)",
+    "protocol": "SSLv3",
+    "au": "DSS",
+    "export": false,
+    "kx": "DH",
+    "cipher": "DHE-DSS-CAMELLIA256-SHA"
+  },
+  "ECDH-RSA-AES128-SHA": {
+    "mac": "SHA1",
+    "enc": "AES(128)",
+    "protocol": "SSLv3",
+    "au": "ECDH",
+    "export": false,
+    "kx": "ECDH/RSA",
+    "cipher": "ECDH-RSA-AES128-SHA"
+  },
+  "DH-DSS-CAMELLIA256-SHA": {
+    "mac": "SHA1",
+    "enc": "Camellia(256)",
+    "protocol": "SSLv3",
+    "au": "DH",
+    "export": false,
+    "kx": "DH/DSS",
+    "cipher": "DH-DSS-CAMELLIA256-SHA"
+  },
+  "RC4-MD5": {
+    "mac": "MD5",
+    "enc": "RC4(128)",
+    "protocol": "SSLv2",
+    "au": "RSA",
+    "export": false,
+    "kx": "RSA",
+    "cipher": "RC4-MD5"
+  },
+  "DHE-DSS-AES128-GCM-SHA256": {
+    "mac": "AEAD",
+    "enc": "AESGCM(128)",
+    "protocol": "TLSv1.2",
+    "au": "DSS",
+    "export": false,
+    "kx": "DH",
+    "cipher": "DHE-DSS-AES128-GCM-SHA256"
+  },
+  "SRP-AES-256-CBC-SHA": {
+    "mac": "SHA1",
+    "enc": "AES(256)",
+    "protocol": "SSLv3",
+    "au": "SRP",
+    "export": false,
+    "kx": "SRP",
+    "cipher": "SRP-AES-256-CBC-SHA"
+  },
+  "DHE-RSA-AES128-SHA": {
+    "mac": "SHA1",
+    "enc": "AES(128)",
+    "protocol": "SSLv3",
+    "au": "RSA",
+    "export": false,
+    "kx": "DH",
+    "cipher": "DHE-RSA-AES128-SHA"
+  },
+  "DH-DSS-AES128-SHA256": {
+    "mac": "SHA256",
+    "enc": "AES(128)",
+    "protocol": "TLSv1.2",
+    "au": "DH",
+    "export": false,
+    "kx": "DH/DSS",
+    "cipher": "DH-DSS-AES128-SHA256"
+  },
+  "AECDH-AES256-SHA": {
+    "mac": "SHA1",
+    "enc": "AES(256)",
+    "protocol": "SSLv3",
+    "au": "None",
+    "export": false,
+    "kx": "ECDH",
+    "cipher": "AECDH-AES256-SHA"
+  },
+  "DHE-RSA-SEED-SHA": {
+    "mac": "SHA1",
+    "enc": "SEED(128)",
+    "protocol": "SSLv3",
+    "au": "RSA",
+    "export": false,
+    "kx": "DH",
+    "cipher": "DHE-RSA-SEED-SHA"
+  },
+  "ECDHE-RSA-AES128-GCM-SHA256": {
+    "mac": "AEAD",
+    "enc": "AESGCM(128)",
+    "protocol": "TLSv1.2",
+    "au": "RSA",
+    "export": false,
+    "kx": "ECDH",
+    "cipher": "ECDHE-RSA-AES128-GCM-SHA256"
+  },
+  "ECDHE-ECDSA-AES256-SHA": {
+    "mac": "SHA1",
+    "enc": "AES(256)",
+    "protocol": "SSLv3",
+    "au": "ECDSA",
+    "export": false,
+    "kx": "ECDH",
+    "cipher": "ECDHE-ECDSA-AES256-SHA"
+  },
+  "ADH-DES-CBC3-SHA": {
+    "mac": "SHA1",
+    "enc": "3DES(168)",
+    "protocol": "SSLv3",
+    "au": "None",
+    "export": false,
+    "kx": "DH",
+    "cipher": "ADH-DES-CBC3-SHA"
+  },
+  "DHE-RSA-AES128-SHA256": {
+    "mac": "SHA256",
+    "enc": "AES(128)",
+    "protocol": "TLSv1.2",
+    "au": "RSA",
+    "export": false,
+    "kx": "DH",
+    "cipher": "DHE-RSA-AES128-SHA256"
+  },
+  "ECDH-ECDSA-AES256-GCM-SHA384": {
+    "mac": "AEAD",
+    "enc": "AESGCM(256)",
+    "protocol": "TLSv1.2",
+    "au": "ECDH",
+    "export": false,
+    "kx": "ECDH/ECDSA",
+    "cipher": "ECDH-ECDSA-AES256-GCM-SHA384"
+  },
+  "ADH-AES128-GCM-SHA256": {
+    "mac": "AEAD",
+    "enc": "AESGCM(128)",
+    "protocol": "TLSv1.2",
+    "au": "None",
+    "export": false,
+    "kx": "DH",
+    "cipher": "ADH-AES128-GCM-SHA256"
+  },
+  "ECDHE-RSA-NULL-SHA": {
+    "mac": "SHA1",
+    "enc": "None",
+    "protocol": "SSLv3",
+    "au": "RSA",
+    "export": false,
+    "kx": "ECDH",
+    "cipher": "ECDHE-RSA-NULL-SHA"
+  },
+  "DHE-RSA-AES256-SHA": {
+    "mac": "SHA1",
+    "enc": "AES(256)",
+    "protocol": "SSLv3",
+    "au": "RSA",
+    "export": false,
+    "kx": "DH",
+    "cipher": "DHE-RSA-AES256-SHA"
+  },
+  "DHE-DSS-AES256-SHA": {
+    "mac": "SHA1",
+    "enc": "AES(256)",
+    "protocol": "SSLv3",
+    "au": "DSS",
+    "export": false,
+    "kx": "DH",
+    "cipher": "DHE-DSS-AES256-SHA"
+  },
+  "ECDH-RSA-AES256-GCM-SHA384": {
+    "mac": "AEAD",
+    "enc": "AESGCM(256)",
+    "protocol": "TLSv1.2",
+    "au": "ECDH",
+    "export": false,
+    "kx": "ECDH/RSA",
+    "cipher": "ECDH-RSA-AES256-GCM-SHA384"
+  },
+  "DH-DSS-AES256-SHA256": {
+    "mac": "SHA256",
+    "enc": "AES(256)",
+    "protocol": "TLSv1.2",
+    "au": "DH",
+    "export": false,
+    "kx": "DH/DSS",
+    "cipher": "DH-DSS-AES256-SHA256"
+  },
+  "ADH-CAMELLIA256-SHA": {
+    "mac": "SHA1",
+    "enc": "Camellia(256)",
+    "protocol": "SSLv3",
+    "au": "None",
+    "export": false,
+    "kx": "DH",
+    "cipher": "ADH-CAMELLIA256-SHA"
+  },
+  "ECDH-ECDSA-AES256-SHA384": {
+    "mac": "SHA384",
+    "enc": "AES(256)",
+    "protocol": "TLSv1.2",
+    "au": "ECDH",
+    "export": false,
+    "kx": "ECDH/ECDSA",
+    "cipher": "ECDH-ECDSA-AES256-SHA384"
+  },
+  "AES128-SHA": {
+    "mac": "SHA1",
+    "enc": "AES(128)",
+    "protocol": "SSLv3",
+    "au": "RSA",
+    "export": false,
+    "kx": "RSA",
+    "cipher": "AES128-SHA"
+  },
+  "EXP-RC4-MD5": {
+    "mac": "MD5",
+    "enc": "RC4(40)",
+    "protocol": "SSLv2",
+    "au": "RSA",
+    "export": true,
+    "kx": "RSA(512)",
+    "cipher": "EXP-RC4-MD5"
+  },
+  "ECDHE-RSA-AES256-GCM-SHA384": {
+    "mac": "AEAD",
+    "enc": "AESGCM(256)",
+    "protocol": "TLSv1.2",
+    "au": "RSA",
+    "export": false,
+    "kx": "ECDH",
+    "cipher": "ECDHE-RSA-AES256-GCM-SHA384"
+  },
+  "DH-DSS-DES-CBC-SHA": {
+    "mac": "SHA1",
+    "enc": "DES(56)",
+    "protocol": "SSLv3",
+    "au": "DH",
+    "export": false,
+    "kx": "DH/DSS",
+    "cipher": "DH-DSS-DES-CBC-SHA"
+  },
+  "AECDH-NULL-SHA": {
+    "mac": "SHA1",
+    "enc": "None",
+    "protocol": "SSLv3",
+    "au": "None",
+    "export": false,
+    "kx": "ECDH",
+    "cipher": "AECDH-NULL-SHA"
+  },
+  "DH-DSS-AES128-GCM-SHA256": {
+    "mac": "AEAD",
+    "enc": "AESGCM(128)",
+    "protocol": "TLSv1.2",
+    "au": "DH",
+    "export": false,
+    "kx": "DH/DSS",
+    "cipher": "DH-DSS-AES128-GCM-SHA256"
+  },
+  "ECDHE-ECDSA-NULL-SHA": {
+    "mac": "SHA1",
+    "enc": "None",
+    "protocol": "SSLv3",
+    "au": "ECDSA",
+    "export": false,
+    "kx": "ECDH",
+    "cipher": "ECDHE-ECDSA-NULL-SHA"
+  },
+  "AES128-SHA256": {
+    "mac": "SHA256",
+    "enc": "AES(128)",
+    "protocol": "TLSv1.2",
+    "au": "RSA",
+    "export": false,
+    "kx": "RSA",
+    "cipher": "AES128-SHA256"
+  },
+  "EXP-ADH-RC4-MD5": {
+    "mac": "MD5",
+    "enc": "RC4(40)",
+    "protocol": "SSLv3",
+    "au": "None",
+    "export": true,
+    "kx": "DH(512)",
+    "cipher": "EXP-ADH-RC4-MD5"
+  },
+  "ADH-AES128-SHA256": {
+    "mac": "SHA256",
+    "enc": "AES(128)",
+    "protocol": "TLSv1.2",
+    "au": "None",
+    "export": false,
+    "kx": "DH",
+    "cipher": "ADH-AES128-SHA256"
+  },
+  "ECDHE-ECDSA-AES128-GCM-SHA256": {
+    "mac": "AEAD",
+    "enc": "AESGCM(128)",
+    "protocol": "TLSv1.2",
+    "au": "ECDSA",
+    "export": false,
+    "kx": "ECDH",
+    "cipher": "ECDHE-ECDSA-AES128-GCM-SHA256"
+  },
+  "ECDH-RSA-DES-CBC3-SHA": {
+    "mac": "SHA1",
+    "enc": "3DES(168)",
+    "protocol": "SSLv3",
+    "au": "ECDH",
+    "export": false,
+    "kx": "ECDH/RSA",
+    "cipher": "ECDH-RSA-DES-CBC3-SHA"
+  },
+  "DH-RSA-DES-CBC-SHA": {
+    "mac": "SHA1",
+    "enc": "DES(56)",
+    "protocol": "SSLv3",
+    "au": "DH",
+    "export": false,
+    "kx": "DH/RSA",
+    "cipher": "DH-RSA-DES-CBC-SHA"
+  },
+  "DH-RSA-SEED-SHA": {
+    "mac": "SHA1",
+    "enc": "SEED(128)",
+    "protocol": "SSLv3",
+    "au": "DH",
+    "export": false,
+    "kx": "DH/RSA",
+    "cipher": "DH-RSA-SEED-SHA"
+  },
+  "ADH-SEED-SHA": {
+    "mac": "SHA1",
+    "enc": "SEED(128)",
+    "protocol": "SSLv3",
+    "au": "None",
+    "export": false,
+    "kx": "DH",
+    "cipher": "ADH-SEED-SHA"
+  },
+  "DHE-RSA-AES256-GCM-SHA384": {
+    "mac": "AEAD",
+    "enc": "AESGCM(256)",
+    "protocol": "TLSv1.2",
+    "au": "RSA",
+    "export": false,
+    "kx": "DH",
+    "cipher": "DHE-RSA-AES256-GCM-SHA384"
+  },
+  "ADH-CAMELLIA128-SHA": {
+    "mac": "SHA1",
+    "enc": "Camellia(128)",
+    "protocol": "SSLv3",
+    "au": "None",
+    "export": false,
+    "kx": "DH",
+    "cipher": "ADH-CAMELLIA128-SHA"
+  },
+  "ECDH-RSA-NULL-SHA": {
+    "mac": "SHA1",
+    "enc": "None",
+    "protocol": "SSLv3",
+    "au": "ECDH",
+    "export": false,
+    "kx": "ECDH/RSA",
+    "cipher": "ECDH-RSA-NULL-SHA"
+  },
+  "ECDH-ECDSA-AES128-SHA": {
+    "mac": "SHA1",
+    "enc": "AES(128)",
+    "protocol": "SSLv3",
+    "au": "ECDH",
+    "export": false,
+    "kx": "ECDH/ECDSA",
+    "cipher": "ECDH-ECDSA-AES128-SHA"
+  },
+  "IDEA-CBC-SHA": {
+    "mac": "SHA1",
+    "enc": "IDEA(128)",
+    "protocol": "SSLv3",
+    "au": "RSA",
+    "export": false,
+    "kx": "RSA",
+    "cipher": "IDEA-CBC-SHA"
+  },
+  "ECDH-ECDSA-RC4-SHA": {
+    "mac": "SHA1",
+    "enc": "RC4(128)",
+    "protocol": "SSLv3",
+    "au": "ECDH",
+    "export": false,
+    "kx": "ECDH/ECDSA",
+    "cipher": "ECDH-ECDSA-RC4-SHA"
+  },
+  "DHE-RSA-AES128-GCM-SHA256": {
+    "mac": "AEAD",
+    "enc": "AESGCM(128)",
+    "protocol": "TLSv1.2",
+    "au": "RSA",
+    "export": false,
+    "kx": "DH",
+    "cipher": "DHE-RSA-AES128-GCM-SHA256"
+  },
+  "AES128-GCM-SHA256": {
+    "mac": "AEAD",
+    "enc": "AESGCM(128)",
+    "protocol": "TLSv1.2",
+    "au": "RSA",
+    "export": false,
+    "kx": "RSA",
+    "cipher": "AES128-GCM-SHA256"
+  },
+  "DHE-DSS-AES128-SHA256": {
+    "mac": "SHA256",
+    "enc": "AES(128)",
+    "protocol": "TLSv1.2",
+    "au": "DSS",
+    "export": false,
+    "kx": "DH",
+    "cipher": "DHE-DSS-AES128-SHA256"
+  },
+  "AECDH-DES-CBC3-SHA": {
+    "mac": "SHA1",
+    "enc": "3DES(168)",
+    "protocol": "SSLv3",
+    "au": "None",
+    "export": false,
+    "kx": "ECDH",
+    "cipher": "AECDH-DES-CBC3-SHA"
+  },
+  "AECDH-AES128-SHA": {
+    "mac": "SHA1",
+    "enc": "AES(128)",
+    "protocol": "SSLv3",
+    "au": "None",
+    "export": false,
+    "kx": "ECDH",
+    "cipher": "AECDH-AES128-SHA"
+  },
+  "DHE-DSS-AES128-SHA": {
+    "mac": "SHA1",
+    "enc": "AES(128)",
+    "protocol": "SSLv3",
+    "au": "DSS",
+    "export": false,
+    "kx": "DH",
+    "cipher": "DHE-DSS-AES128-SHA"
+  },
+  "ADH-AES256-GCM-SHA384": {
+    "mac": "AEAD",
+    "enc": "AESGCM(256)",
+    "protocol": "TLSv1.2",
+    "au": "None",
+    "export": false,
+    "kx": "DH",
+    "cipher": "ADH-AES256-GCM-SHA384"
+  },
+  "DH-RSA-CAMELLIA256-SHA": {
+    "mac": "SHA1",
+    "enc": "Camellia(256)",
+    "protocol": "SSLv3",
+    "au": "DH",
+    "export": false,
+    "kx": "DH/RSA",
+    "cipher": "DH-RSA-CAMELLIA256-SHA"
+  },
+  "DHE-DSS-SEED-SHA": {
+    "mac": "SHA1",
+    "enc": "SEED(128)",
+    "protocol": "SSLv3",
+    "au": "DSS",
+    "export": false,
+    "kx": "DH",
+    "cipher": "DHE-DSS-SEED-SHA"
+  },
+  "EDH-DSS-DES-CBC3-SHA": {
+    "mac": "SHA1",
+    "enc": "3DES(168)",
+    "protocol": "SSLv3",
+    "au": "DSS",
+    "export": false,
+    "kx": "DH",
+    "cipher": "EDH-DSS-DES-CBC3-SHA"
+  },
+  "EXP-EDH-RSA-DES-CBC-SHA": {
+    "mac": "SHA1",
+    "enc": "DES(40)",
+    "protocol": "SSLv3",
+    "au": "RSA",
+    "export": true,
+    "kx": "DH(512)",
+    "cipher": "EXP-EDH-RSA-DES-CBC-SHA"
+  },
+  "CAMELLIA128-SHA": {
+    "mac": "SHA1",
+    "enc": "Camellia(128)",
+    "protocol": "SSLv3",
+    "au": "RSA",
+    "export": false,
+    "kx": "RSA",
+    "cipher": "CAMELLIA128-SHA"
+  },
+  "DH-RSA-AES256-GCM-SHA384": {
+    "mac": "AEAD",
+    "enc": "AESGCM(256)",
+    "protocol": "TLSv1.2",
+    "au": "DH",
+    "export": false,
+    "kx": "DH/RSA",
+    "cipher": "DH-RSA-AES256-GCM-SHA384"
+  },
+  "PSK-RC4-SHA": {
+    "mac": "SHA1",
+    "enc": "RC4(128)",
+    "protocol": "SSLv3",
+    "au": "PSK",
+    "export": false,
+    "kx": "PSK",
+    "cipher": "PSK-RC4-SHA"
+  },
+  "SRP-RSA-AES-128-CBC-SHA": {
+    "mac": "SHA1",
+    "enc": "AES(128)",
+    "protocol": "SSLv3",
+    "au": "RSA",
+    "export": false,
+    "kx": "SRP",
+    "cipher": "SRP-RSA-AES-128-CBC-SHA"
+  },
+  "EDH-RSA-DES-CBC3-SHA": {
+    "mac": "SHA1",
+    "enc": "3DES(168)",
+    "protocol": "SSLv3",
+    "au": "RSA",
+    "export": false,
+    "kx": "DH",
+    "cipher": "EDH-RSA-DES-CBC3-SHA"
+  },
+  "RC4-SHA": {
+    "mac": "SHA1",
+    "enc": "RC4(128)",
+    "protocol": "SSLv3",
+    "au": "RSA",
+    "export": false,
+    "kx": "RSA",
+    "cipher": "RC4-SHA"
+  },
+  "SRP-DSS-AES-128-CBC-SHA": {
+    "mac": "SHA1",
+    "enc": "AES(128)",
+    "protocol": "SSLv3",
+    "au": "DSS",
+    "export": false,
+    "kx": "SRP",
+    "cipher": "SRP-DSS-AES-128-CBC-SHA"
+  },
+  "DHE-DSS-CAMELLIA128-SHA": {
+    "mac": "SHA1",
+    "enc": "Camellia(128)",
+    "protocol": "SSLv3",
+    "au": "DSS",
+    "export": false,
+    "kx": "DH",
+    "cipher": "DHE-DSS-CAMELLIA128-SHA"
+  },
+  "DES-CBC3-MD5": {
+    "mac": "MD5",
+    "enc": "3DES(168)",
+    "protocol": "SSLv2",
+    "au": "RSA",
+    "export": false,
+    "kx": "RSA",
+    "cipher": "DES-CBC3-MD5"
+  },
+  "ECDHE-RSA-AES128-SHA256": {
+    "mac": "SHA256",
+    "enc": "AES(128)",
+    "protocol": "TLSv1.2",
+    "au": "RSA",
+    "export": false,
+    "kx": "ECDH",
+    "cipher": "ECDHE-RSA-AES128-SHA256"
+  },
+  "ECDH-RSA-AES128-GCM-SHA256": {
+    "mac": "AEAD",
+    "enc": "AESGCM(128)",
+    "protocol": "TLSv1.2",
+    "au": "ECDH",
+    "export": false,
+    "kx": "ECDH/RSA",
+    "cipher": "ECDH-RSA-AES128-GCM-SHA256"
+  },
+  "ECDH-ECDSA-DES-CBC3-SHA": {
+    "mac": "SHA1",
+    "enc": "3DES(168)",
+    "protocol": "SSLv3",
+    "au": "ECDH",
+    "export": false,
+    "kx": "ECDH/ECDSA",
+    "cipher": "ECDH-ECDSA-DES-CBC3-SHA"
+  },
+  "PSK-AES256-CBC-SHA": {
+    "mac": "SHA1",
+    "enc": "AES(256)",
+    "protocol": "SSLv3",
+    "au": "PSK",
+    "export": false,
+    "kx": "PSK",
+    "cipher": "PSK-AES256-CBC-SHA"
+  },
+  "DH-DSS-CAMELLIA128-SHA": {
+    "mac": "SHA1",
+    "enc": "Camellia(128)",
+    "protocol": "SSLv3",
+    "au": "DH",
+    "export": false,
+    "kx": "DH/DSS",
+    "cipher": "DH-DSS-CAMELLIA128-SHA"
+  },
+  "DH-DSS-SEED-SHA": {
+    "mac": "SHA1",
+    "enc": "SEED(128)",
+    "protocol": "SSLv3",
+    "au": "DH",
+    "export": false,
+    "kx": "DH/DSS",
+    "cipher": "DH-DSS-SEED-SHA"
+  },
+  "AES256-SHA": {
+    "mac": "SHA1",
+    "enc": "AES(256)",
+    "protocol": "SSLv3",
+    "au": "RSA",
+    "export": false,
+    "kx": "RSA",
+    "cipher": "AES256-SHA"
+  },
+  "ECDHE-ECDSA-AES128-SHA256": {
+    "mac": "SHA256",
+    "enc": "AES(128)",
+    "protocol": "TLSv1.2",
+    "au": "ECDSA",
+    "export": false,
+    "kx": "ECDH",
+    "cipher": "ECDHE-ECDSA-AES128-SHA256"
+  },
+  "NULL-SHA": {
+    "mac": "SHA1",
+    "enc": "None",
+    "protocol": "SSLv3",
+    "au": "RSA",
+    "export": false,
+    "kx": "RSA",
+    "cipher": "NULL-SHA"
+  },
+  "DES-CBC-MD5": {
+    "mac": "MD5",
+    "enc": "DES(56)",
+    "protocol": "SSLv2",
+    "au": "RSA",
+    "export": false,
+    "kx": "RSA",
+    "cipher": "DES-CBC-MD5"
+  },
+  "DH-RSA-AES256-SHA": {
+    "mac": "SHA1",
+    "enc": "AES(256)",
+    "protocol": "SSLv3",
+    "au": "DH",
+    "export": false,
+    "kx": "DH/RSA",
+    "cipher": "DH-RSA-AES256-SHA"
+  },
+  "DH-RSA-DES-CBC3-SHA": {
+    "mac": "SHA1",
+    "enc": "3DES(168)",
+    "protocol": "SSLv3",
+    "au": "DH",
+    "export": false,
+    "kx": "DH/RSA",
+    "cipher": "DH-RSA-DES-CBC3-SHA"
+  },
+  "NULL-MD5": {
+    "mac": "MD5",
+    "enc": "None",
+    "protocol": "SSLv3",
+    "au": "RSA",
+    "export": false,
+    "kx": "RSA",
+    "cipher": "NULL-MD5"
+  },
+  "AES256-GCM-SHA384": {
+    "mac": "AEAD",
+    "enc": "AESGCM(256)",
+    "protocol": "TLSv1.2",
+    "au": "RSA",
+    "export": false,
+    "kx": "RSA",
+    "cipher": "AES256-GCM-SHA384"
+  },
+  "EXP-DES-CBC-SHA": {
+    "mac": "SHA1",
+    "enc": "DES(40)",
+    "protocol": "SSLv3",
+    "au": "RSA",
+    "export": true,
+    "kx": "RSA(512)",
+    "cipher": "EXP-DES-CBC-SHA"
+  },
+  "AECDH-RC4-SHA": {
+    "mac": "SHA1",
+    "enc": "RC4(128)",
+    "protocol": "SSLv3",
+    "au": "None",
+    "export": false,
+    "kx": "ECDH",
+    "cipher": "AECDH-RC4-SHA"
+  },
+  "ECDHE-RSA-RC4-SHA": {
+    "mac": "SHA1",
+    "enc": "RC4(128)",
+    "protocol": "SSLv3",
+    "au": "RSA",
+    "export": false,
+    "kx": "ECDH",
+    "cipher": "ECDHE-RSA-RC4-SHA"
+  },
+  "DH-DSS-AES256-SHA": {
+    "mac": "SHA1",
+    "enc": "AES(256)",
+    "protocol": "SSLv3",
+    "au": "DH",
+    "export": false,
+    "kx": "DH/DSS",
+    "cipher": "DH-DSS-AES256-SHA"
+  },
+  "EDH-DSS-DES-CBC-SHA": {
+    "mac": "SHA1",
+    "enc": "DES(56)",
+    "protocol": "SSLv3",
+    "au": "DSS",
+    "export": false,
+    "kx": "DH",
+    "cipher": "EDH-DSS-DES-CBC-SHA"
+  },
+  "EXP-ADH-DES-CBC-SHA": {
+    "mac": "SHA1",
+    "enc": "DES(40)",
+    "protocol": "SSLv3",
+    "au": "None",
+    "export": true,
+    "kx": "DH(512)",
+    "cipher": "EXP-ADH-DES-CBC-SHA"
+  }
+}
