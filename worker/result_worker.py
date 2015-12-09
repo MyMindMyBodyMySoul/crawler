@@ -3,7 +3,7 @@ This module fetches results out of the queue_manager and formats it in JSON to a
 """
 
 
-from queue_manager import QueueClient
+from server.queue_manager import QueueClient
 from pymongo import MongoClient, errors
 from time import sleep
 import datetime
@@ -15,9 +15,8 @@ AVAILABLE_TRUST_STORES = {
     ('Microsoft', '09/2015'),
     ('Apple', 'OS X 10.10.5'),
     ('Java 6', 'Update 65'),
-   ('Google', '09/2015')
+    ('Google', '09/2015')
 }
-
 
 
 class Database(object):
@@ -189,7 +188,7 @@ def main():
                     )
                 )
 
-        mdb.insert_result(db_item)
+            mdb.insert_result(db_item)
 
 
 if __name__ == "__main__":

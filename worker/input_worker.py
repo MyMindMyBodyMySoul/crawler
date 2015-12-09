@@ -1,4 +1,4 @@
-from queue_manager import QueueClient
+from server.queue_manager import QueueClient
 import requests, zipfile, StringIO, shutil, time, datetime
 
 __author__ = 'david'
