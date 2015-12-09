@@ -265,8 +265,9 @@ class PluginCertInfo(PluginBase.PluginBase):
             ocsp_xml.append(ocsp_resp_xmp)
             
         xml_output.append(ocsp_xml)
-
-        return PluginBase.PluginResult(text_output, xml_output, x509_cert.as_dict())
+        tmp_dict = x509_cert.as_dict()
+        tmp_dict["trusted"] = verify_dict
+        return PluginBase.PluginResult(text_output, xml_output, tmp_dict)
 
 
     # FORMATTING FUNCTIONS

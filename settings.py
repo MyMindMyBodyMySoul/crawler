@@ -6,7 +6,7 @@ This module contains global settings for all modules.
 LOG_FILE = None
 
 #: the bind address of the :class:`~queue_manager.QueueServer`
-SERVER_ADDRESS = 'localhost'
+SERVER_ADDRESS = 'localhost'  # '193.196.143.140'
 
 #: the bind port of the :class:`~queue_manager.QueueServer`
 SERVER_PORT = 50001
@@ -24,19 +24,19 @@ NUMBER_PROCESSES = 1
 #:      "heartbleed", "chrome_sha1", "compression", "certinfo"]
 #: For details see `SSLyze <https://github.com/nabla-c0d3/sslyze>`_.
 COMMAND_LIST = [
-    "tlsv1_2",
+    #"tlsv1_2",
     "tlsv1_1",
-    "tlsv1",
-    "sslv3",
-    "sslv2",
+    #"tlsv1",
+    #"sslv3",
+    #"sslv2",
     # "reneg",
     # "hsts",
     # "resum",
     # "resum_rate",
-    "heartbleed",
+    # "heartbleed",
     # "chrome_sha1",
     # "compression",
-    # "certinfo",
+    "certinfo",
 ]
 
 
