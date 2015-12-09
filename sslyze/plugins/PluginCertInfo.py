@@ -265,8 +265,13 @@ class PluginCertInfo(PluginBase.PluginBase):
             ocsp_xml.append(ocsp_resp_xmp)
             
         xml_output.append(ocsp_xml)
+
         tmp_dict = x509_cert.as_dict()
-        tmp_dict["trusted"] = verify_dict
+        trusted_dict = {}
+        for store in verify_dict:
+            trusted_dict[store[0]] = verify_dict[store]
+        tmp_dict["trusted"] = trusted_dict
+
         return PluginBase.PluginResult(text_output, xml_output, tmp_dict)
 
 
