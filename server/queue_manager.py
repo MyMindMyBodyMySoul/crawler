@@ -16,9 +16,9 @@ from threading import Lock, Condition
 import settings
 
 try:
-    from queue import Queue
+    from queue import Queue, Empty
 except ImportError:
-    from Queue import Queue
+    from Queue import Queue, Empty
 
 
 class QueueManager(object):
@@ -42,14 +42,13 @@ class QueueManager(object):
 
         self._counter = 0
         self._new_list_holder = None
+
         # Initial value of -1 is preventing getting trapped in the put_new_list function on startup
         self._times_fully_parsed = -1
+
         # Definitions for Mutex-locks
         self._is_filling = False
-        self._lock = Lock()
-        self.mutex = Lock()
-        self.not_empty = Condition(self.mutex)
-        self.my_cond = Condition(self.mutex)
+        self._filling_condition = Condition()
 
     def __call__(self, *args, **kwargs):
         return self
@@ -65,19 +64,17 @@ class QueueManager(object):
             # Trap for prioritizing the user_queue
             return self._user_queue.get()
 
-        hostname = self._host_queue.get()
+        try:
+            hostname = self._host_queue.get(timeout=3)
+        except Empty:
+            return None, None
 
-
-        with self.not_empty:
+        with self._filling_condition:
             while self._is_filling:
-                self.not_empty.wait()
+                self._filling_condition.wait()
 
-        #self._wait_if_queue_filling()
-
-        # cycle queue
+            # cycle queue
             self._host_queue.put(hostname)
-
-       # with self._lock:
 
             self.put_new_list(self._new_list_holder)
 
@@ -90,11 +87,7 @@ class QueueManager(object):
                 self._times_fully_parsed +=1
 
             #print("The position counter:", self._counter," Times fully parsed: ",self._times_fully_parsed)
-            return hostname
-
-    def _wait_if_queue_filling(self):
-        while self._is_filling:
-            pass
+            return hostname, None
 
     def empty_queue(self):
         """
@@ -119,8 +112,8 @@ class QueueManager(object):
         :param list user_request: the url requested to be checked by sslyze
         :param user_id: unique user identifier corresponding to the request
         """
-        self._user_result_dict[user_id]=Queue()
-        self._user_queue.put(user_request)
+        self._user_result_dict[user_id] = Queue()
+        self._user_queue.put((user_request, user_id))
 
     def put_new_list(self, new_list):
         """
@@ -157,12 +150,8 @@ class QueueManager(object):
         self._new_list_holder = None
         self._is_filling = False
 
-        with self.my_cond:
-            self.not_empty.notify_all()
-
-
-
-
+        with self._filling_condition:
+            self._filling_condition.notify_all()
 
     def next_result(self):
         """
@@ -187,10 +176,14 @@ class QueueManager(object):
                     this function
                     There will be only one sslyze result per user_id
         """
-        _inner_result_queue = self._user_result_dict[user_id]
+        try:
+            result = self._user_result_dict[user_id].get(30)
+        except Empty:
+            result = dict(error="internal timeout")
+
         del self._user_result_dict[user_id]
 
-        return _inner_result_queue.get()
+        return result
 
     def put_result(self, result):
         """
@@ -211,6 +204,7 @@ class QueueManager(object):
         _inner_result_queue = self._user_result_dict[user_id]
         _inner_result_queue.put(result)
 
+
 class QueueClient(BaseManager):
     """
     This class is used to connect to QueueServer.
@@ -228,7 +222,7 @@ class QueueClient(BaseManager):
 
         # registered name is "queue_manager" , so you can call it to get
         # the instance of QueueManager class.
-        queue_manager = c.queue_manger()
+        queue_manager = c.queue_manager()
 
         # do something with queue_manager ...
 
