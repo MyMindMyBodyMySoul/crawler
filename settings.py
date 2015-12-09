@@ -2,11 +2,43 @@
 This module contains global settings for all modules.
 """
 
-#: the file in which all output will be written.
+##########################
+# RUNNING                #
+##########################
+
+#: the path to your python executable. empty string for default system interpreter.
+PYTHON_PATH = ""
+
+#: all modules in this list will be started in separate process
+MODULE_LIST = [
+    "server.queue_manager",
+    "server.web",
+    "worker.input_worker",
+    "worker.result_worker",
+    "worker.sslyze_worker"
+]
+
+
+##########################
+# LOGGING                #
+##########################
+
+#: the output of the modules in this list will be logged to console or to file
+LOG_MODULES = MODULE_LIST
+
+#: the file in which all output will be written. If None it goes to stdout.
 LOG_FILE = None
 
+
+##########################
+# SERVER                 #
+##########################
+
+WEB_SERVER_ADDRESS = 'localhost'
+WEB_SERVER_PORT = 8080
+
 #: the bind address of the :class:`~queue_manager.QueueServer`
-SERVER_ADDRESS = 'localhost'  # '193.196.143.140'
+SERVER_ADDRESS = 'localhost'
 
 #: the bind port of the :class:`~queue_manager.QueueServer`
 SERVER_PORT = 50001
@@ -15,8 +47,12 @@ SERVER_PORT = 50001
 SERVER_AUTH = b'abc'
 
 
+##########################
+# SSLYZE                 #
+##########################
+
 #: the number of sslyze worker processes
-NUMBER_PROCESSES = 1
+NUMBER_PROCESSES = 2
 
 #: a list of commands that sslyze will be used for scanning.
 #:  available commands are:
@@ -24,11 +60,11 @@ NUMBER_PROCESSES = 1
 #:      "heartbleed", "chrome_sha1", "compression", "certinfo"]
 #: For details see `SSLyze <https://github.com/nabla-c0d3/sslyze>`_.
 COMMAND_LIST = [
-    #"tlsv1_2",
+    "tlsv1_2",
     "tlsv1_1",
-    #"tlsv1",
-    #"sslv3",
-    #"sslv2",
+    "tlsv1",
+    "sslv3",
+    "sslv2",
     # "reneg",
     # "hsts",
     # "resum",
@@ -38,7 +74,6 @@ COMMAND_LIST = [
     # "compression",
     "certinfo",
 ]
-
 
 
 #: this are shared settings used by sslyze.
