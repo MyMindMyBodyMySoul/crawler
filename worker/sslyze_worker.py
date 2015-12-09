@@ -10,7 +10,7 @@ import sys
 import signal
 from multiprocessing import Process
 import settings
-from queue_manager import QueueClient
+from server.queue_manager import QueueClient
 from sslyze.plugins import PluginsFinder
 
 try:
@@ -28,11 +28,12 @@ class WorkerProcess(Process):
     """
     This class checks hosts from the host_queue with the settings specified in settings.py.
     """
-    def __init__(self, qm, available_commands):
+    def __init__(self, qm, available_commands, i):
         Process.__init__(self)
 
         self._qm = qm
         self.available_commands = available_commands
+        self._i = i
 
     def run(self):
         # Plugin classes are unpickled by the multiprocessing module
@@ -43,14 +44,17 @@ class WorkerProcess(Process):
 
         while True:
 
-            hostname = self._qm.next_host()
+            hostname, user_id = self._qm.next_host()
+
+            if user_id:
+                print("process %s got hostname: %s" % (self._i, hostname))
 
             if hostname is None:
                 continue
 
             target = self._test_server(hostname)
 
-            if target:
+            if target[0]:
                 result_dict = dict(target=target, result=[], error=False)
 
                 for command in settings.COMMAND_LIST:
@@ -72,6 +76,12 @@ class WorkerProcess(Process):
 
                     result_dict["result"].append(result)
 
+            else:
+                result_dict = target[1]
+
+            if user_id:
+                self._qm.put_user_result(result_dict, user_id)
+            else:
                 self._qm.put_result(result_dict)
 
     def _process_command(self, target, command):
@@ -87,8 +97,7 @@ class WorkerProcess(Process):
             target = ServersConnectivityTester._test_server(hostname, settings.SHARED_SETTINGS)
         except InvalidTargetError as err:
             result_dict = dict(target=(hostname, None, None), result=err.get_error(), error=True)
-            self._qm.put_result(result_dict)
-            return
+            return None, result_dict
         return target
 
 
@@ -115,6 +124,8 @@ def main():
     ########################
     # QUEUE INITIALIZATION #
     ########################
+    print("connect to QueueManager ...")
+
     c = QueueClient()
     qm = c.queue_manager()
 
@@ -122,8 +133,9 @@ def main():
     # PROCESS INITIALIZATION #
     ##########################
     print("starting %s sslyze worker processes ..." % settings.NUMBER_PROCESSES)
+
     for _ in xrange(settings.NUMBER_PROCESSES):
-        p = WorkerProcess(qm, available_commands)
+        p = WorkerProcess(qm, available_commands, _)
         p.start()
         process_list.append(p)
 
