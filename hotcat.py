@@ -16,18 +16,10 @@ from Queue import Queue
 
 import settings
 
-#: the path to your python executable
-PYTHON_PATH = ""
-
-#: all modules in this list will be started in separate process
-MODULE_LIST = ["queue_manager.py", "myinput_worker.py", "sslyze_worker.py", "result_worker.py"]
-
-#: the output of the modules in this list will be logged to console or to file
-LOG_MODULES = MODULE_LIST
+os.environ["PYTHONPATH"] = os.getcwd()
 
 #: holds the running processes
 RUNNING_PROCESSES = []
-
 
 
 def _enqueue_out(stream, module, q):
@@ -72,23 +64,28 @@ def _sigint_handler(signum, frame):
 
 
 def _to_console(fd, module, pipe_type, msg, ts):
-    if pipe_type == "stderr":
-        color = 95
-    elif module == "queue_manager.py":
-        color = 91
-    elif module == "input_worker.py":
-        color = 94
-    elif module == "sslyze_worker.py":
-        color = 92
-    elif module == "result_worker.py":
-        color = 93
 
-    msg = "\033[%sm%s [%s]:     %s\033[0m\n" % (color, ts, module, msg)
+    if pipe_type == "stderr":
+        color = 31
+    elif module == "server.queue_manager":
+        color = 92
+    elif module == "worker.input_worker":
+        color = 93
+    elif module == "worker.sslyze_worker":
+        color = 94
+    elif module == "worker.result_worker":
+        color = 95
+    elif module == "server.web":
+        color = 96
+    else:
+        color = 0
+
+    msg = "\033[{0}m{1} [{2:<28} {3}\033[0m\n".format(color, ts, module+']:', msg)
     fd.write(msg)
 
 
 def _to_file(fd, module, pipe_type, msg, ts):
-    msg = "%s [%s]:     %s\n" % (ts, module, msg)
+    msg = "{0} [{1:<28} {2}\n".format(ts, module+']:', msg)
     fd.write(msg)
 
 
@@ -103,9 +100,14 @@ def main():
 
     print("Starting modules ...")
 
-    for module in MODULE_LIST:
+    for module in settings.MODULE_LIST:
 
-        p = subprocess.Popen([os.path.join(PYTHON_PATH, "python"), "-u", module], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        p = subprocess.Popen(
+            [os.path.join(settings.PYTHON_PATH, "python"), "-u", module.replace('.', '/') + '.py'],
+            env=os.environ,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE)
+
         RUNNING_PROCESSES.append([p, module])
 
         print("%s is running with PID %s" % (module, p.pid))
@@ -120,7 +122,7 @@ def main():
 
     print("")
 
-    #the FD in which is written.
+    # the FD in which is written.
     if settings.LOG_FILE:
         log_fd = open(settings.LOG_FILE, "w")
         _write_log = _to_file
@@ -131,7 +133,7 @@ def main():
     while True:
         line = q.get()
 
-        if line[0] in LOG_MODULES:
+        if line[0] in settings.LOG_MODULES:
                 _write_log(log_fd, line[0], line[1], line[2], str(datetime.now()).split('.')[0])
 
 
