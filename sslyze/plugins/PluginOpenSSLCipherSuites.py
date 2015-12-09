@@ -84,9 +84,6 @@ class PluginOpenSSLCipherSuites(PluginBase.PluginBase):
         sslClient = SslClient(sslVersion=sslVersion)
         sslClient.set_cipher_list('ALL:COMPLEMENTOFALL')
         cipher_list = sslClient.get_cipher_list()
-        print cipher_list
-
-
 
         # Create a thread pool
         NB_THREADS = min(len(cipher_list), MAX_THREADS) # One thread per cipher
