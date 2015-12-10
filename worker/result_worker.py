@@ -59,8 +59,7 @@ def _parse_cert(command_result):
     utc_ts = datetime.datetime.utcnow()
     self=False
 
-    trusted_result =_is_trusted(command_result.get("trusted"))
-
+    trusted_result = _is_trusted(command_result.get("trusted"))
 
     cert_dict = dict(
         issuer=command_result['issuer']['commonName'],
@@ -75,32 +74,28 @@ def _parse_cert(command_result):
         expired=False
     )
 
+    #print cert_dict['selfSigned']
 
-
-    print cert_dict['selfSigned']
-
-    if(not_after < utc_ts and utc_ts > not_before):
+    if not_after < utc_ts and utc_ts > not_before:
         cert_dict['expired'] = True
-
     return cert_dict
+
 
 def _is_trusted(signed_result):
     trusted_result = dict(
         selfSigned=False,
         trusted=False
     )
-    if signed_result[('Google', '09/2015')] == 'self signed certificate': #  and trusted_result['Java 6']['Update 65']=='ok' and trusted_result['Microsoft']['09/2015']=='ok' and  trusted_result['Apple']['OS X 10.10.15']=='ok' and trusted_result['Mozilla']['09/2015']=='ok' ):
-        trusted_result['selfSigned']=True
-    elif signed_result[('Google', '09/2015')] == 'ok':
-        trusted_result['trusted']=True
-
+    if signed_result['Google'] == 'self signed certificate':
+        trusted_result['selfSigned'] = True
+    elif signed_result['Google'] == 'ok':
+        trusted_result['trusted'] = True
     return trusted_result
 
 
 def _parse_ciphers(result, protocol):
 
     ciphers_list = []
-
     key_status_list = [
         ('preferredCipherSuite', 'preferred:'),
         ('acceptedCipherSuites', 'accepted:'),
@@ -140,6 +135,7 @@ def _parse_ciphers(result, protocol):
 
     return ciphers_list
 
+
 def main():
     # get instance of QueueClient
     c = QueueClient()
@@ -147,7 +143,6 @@ def main():
     qm = c.queue_manager()
     # get instance of Database
     mdb = Database()
-
 
     tls_ver = ['tlsv1_2', 'tlsv1_1', 'sslv3', 'sslv2', 'tlsv1']
 
@@ -163,7 +158,7 @@ def main():
         certificate = {}
 
         if result.get("error"):
-            #print(result.get("err_msg"))
+            # print(result.get("err_msg"))
             scan_error = True
 
         else:
