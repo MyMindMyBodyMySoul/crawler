@@ -55,16 +55,14 @@ def _parse_cert(command_result):
 
     not_before = datetime.datetime.strptime(command_result['validity']['notBefore'], '%b %d %H:%M:%S %Y %Z')
     not_after = datetime.datetime.strptime(command_result['validity']['notAfter'], '%b %d %H:%M:%S %Y %Z')
-    ts = datetime.datetime.now()
     utc_ts = datetime.datetime.utcnow()
-    self=False
 
     trusted_result = _is_trusted(command_result.get("trusted"))
 
     cert_dict = dict(
         issuer=command_result['issuer']['commonName'],
         subject=command_result['subject']['commonName'],
-        publicKeyLengh=command_result['subjectPublicKeyInfo']['publicKeySize'],
+        publicKeyLengh=int(command_result['subjectPublicKeyInfo']['publicKeySize']),
         publicKeyAlgorithm=command_result['subjectPublicKeyInfo']['publicKeyAlgorithm'],
         signatureAlgorithm=command_result['signatureAlgorithm'],
         notValidBefore=not_before,
@@ -73,8 +71,6 @@ def _parse_cert(command_result):
         trusted=trusted_result['trusted'],
         expired=False
     )
-
-    #print cert_dict['selfSigned']
 
     if not_after < utc_ts and utc_ts > not_before:
         cert_dict['expired'] = True
@@ -93,20 +89,37 @@ def _is_trusted(signed_result):
     return trusted_result
 
 
-def _parse_ciphers(result, protocol):
+def _parse_ciphers(result, protocol, public_key_size):
 
     ciphers_list = []
     key_status_list = [
-        ('preferredCipherSuite', 'preferred:'),
-        ('acceptedCipherSuites', 'accepted:'),
+        ('preferredCipherSuite', 'preferred'),
+        ('acceptedCipherSuites', 'accepted'),
         ('errors', 'error'),
-        ('rejectedCipherSuites', 'rejected:')
+        ('rejectedCipherSuites', 'rejected')
     ]
+    protocol_dict = dict(
+        tlsv1='TLSv1.0',
+        tlsv1_1='TLSv1.1',
+        tlsv1_2='TLSv1.2',
+        sslv2='SSLv2',
+        sslv3='SSLv3',
+    )
 
+    preferred_cipher = None
     for (result_key, result_status) in key_status_list:
+        if result_status == 'rejected':
+            continue
         result_list = result[result_key]
 
         for ssl_cipher in result_list:
+
+            # exclude the preferred cipher suite from the accepted ones
+            if result_status == 'preferred':
+                preferred_cipher = ssl_cipher
+            if result_status == 'accepted' and preferred_cipher == ssl_cipher:
+                preferred_cipher = None
+                continue
 
             msg = result_list.get(ssl_cipher)[0]  # msg not used until now
             bits = result_list.get(ssl_cipher)[1]
@@ -115,11 +128,10 @@ def _parse_ciphers(result, protocol):
 
             cipher_dict = dict(
                 cipher=ssl_cipher,
-                protocol=protocol,
+                protocol=protocol_dict.get(protocol),
                 status=result_status,
                 bits=bits,
                 kx=cipher_desc.get("kx"),
-                kxStrength=0,  # don't known where to get this value when it is cert
                 au=cipher_desc.get("au"),
                 enc=cipher_desc.get("enc"),
                 mac=cipher_desc.get("mac"),
@@ -129,7 +141,9 @@ def _parse_ciphers(result, protocol):
             if dh_info:
                 if dh_info.get("Prime"):
                     cipher_dict["curve"] = "P-%s" % dh_info.get("GroupSize")
-                    cipher_dict["kxStrength"] = dh_info.get("GroupSize")
+                    cipher_dict["kxStrength"] = int(dh_info.get("GroupSize"))
+            else:
+                cipher_dict["kxStrength"] = int(public_key_size)
 
             ciphers_list.append(cipher_dict)
 
@@ -153,7 +167,7 @@ def main():
         scan_date = datetime.datetime.now()
         domain = result.get("target")[0]
         tld = get_tld('https://' + domain, as_object=True).suffix
-        source = result.get("source")
+        sources = result.get("source")
         ciphers = []
         certificate = {}
 
@@ -162,25 +176,36 @@ def main():
             scan_error = True
 
         else:
-            for command_result in result.get("result"):
+            result_list = result.get('result')
+
+            public_key_size = None
+            db_item = None
+
+            #  move the result of certinfo to the front of the result_list
+            cert_result_index = 0
+            for result in result_list:
+                if result.get('command') == 'certinfo':
+                    cert_result_index = result
+            result_list.insert(0, result_list.pop(result_list.index(cert_result_index)))
+
+            for command_result in result_list:
                 if command_result.get("error"):
                     # TODO handle error
                     continue
                 if command_result.get("command") in tls_ver:
-                    ciphers.extend(_parse_ciphers(command_result, command_result.get("command")))
+                    ciphers.extend(_parse_ciphers(command_result, command_result.get("command"), public_key_size))
                 elif command_result["command"] == "certinfo":
+                    public_key_size = command_result.get('subjectPublicKeyInfo').get('publicKeySize')
                     certificate = _parse_cert(command_result)
 
                 db_item = dict(
-                    scans=dict(
                         scanError=scan_error,
                         scanDate=scan_date,
                         domain=domain,
                         tld=tld,
-                        source=source,
+                        sources=sources,
                         ciphers=ciphers,
                         certificate=certificate,
-                    )
                 )
 
             mdb.insert_result(db_item)
