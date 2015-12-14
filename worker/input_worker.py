@@ -1,10 +1,10 @@
 from server.queue_manager import QueueClient
-import requests, zipfile, StringIO, shutil, time, datetime
-
-__author__ = 'david'
+import requests, zipfile, StringIO, time, datetime
+import os
 
 alexa_splits = [1000000, 1000, 100]
 nextDownloadDate = datetime.date.today()
+csvPath = "../data/top-1m.csv"
 
 # creates list from AlexaCSV with dated sources
 def datedAlexaCSV(splits):
@@ -12,7 +12,7 @@ def datedAlexaCSV(splits):
     splits.sort()
     m = splits[len(splits) - 1] + 1
     r = []
-    f = open("data/top-1m.csv", "r")
+    f = open(csvPath, "r")
     for i in range(1,m):
         c = str(i) + ','
         t = f.readline().replace('\n', '').replace(c, '')
@@ -35,10 +35,11 @@ def getAlexaCSV():
     print("Finished downloading alexa top 1 million zip. Starting extraction...")
     #unzips
     z = zipfile.ZipFile(StringIO.StringIO(r.content))
-    z.extractall()
+    if not os._exists("../data/"):
+        os.mkdir("../data/")
+    z.extractall("../data/")
     print("Finished extracting alexa top 1 million zip. Sending list to queue_manager...")
     #moves file from "crawler" to "crawler/data"
-    shutil.move("top-1m.csv", "data/top-1m.csv")
     #get date as "dd.mm.yyyy"
     today = time.strftime("%d.%m.%Y")
     return today
@@ -69,6 +70,7 @@ if __name__ == "__main__":
         if today > nextDownloadDate:
             alexa_splits = [1000000, 1000, 100] #2. try crashes without this line at " m = splits[len(splits) - 1] + 1" ~ Line 13
             queue_manager.put_new_list(datedAlexaCSV(alexa_splits))
+        os.remove(csvPath)
         print("sleeping now")
         time.sleep(86400)#sleeps for 86400 seconds, ~1 day
 
