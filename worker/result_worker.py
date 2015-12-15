@@ -5,18 +5,10 @@ This module fetches results out of the queue_manager and formats it in JSON to a
 
 from server.queue_manager import QueueClient
 from pymongo import MongoClient, errors
-from time import sleep
+from time import sleep, time
 import datetime
 from tld import get_tld
 from cipher_desc import CIPHER_DESC
-
-AVAILABLE_TRUST_STORES = {
-    ('Mozilla NSS', '09/2015'),
-    ('Microsoft', '09/2015'),
-    ('Apple', 'OS X 10.10.5'),
-    ('Java 6', 'Update 65'),
-    ('Google', '09/2015')
-}
 
 
 class Database(object):
@@ -60,15 +52,15 @@ def _parse_cert(command_result):
     trusted_result = _is_trusted(command_result.get("trusted"))
 
     cert_dict = dict(
-        issuer=command_result['issuer']['commonName'],
-        subject=command_result['subject']['commonName'],
-        publicKeyLengh=int(command_result['subjectPublicKeyInfo']['publicKeySize']),
-        publicKeyAlgorithm=command_result['subjectPublicKeyInfo']['publicKeyAlgorithm'],
-        signatureAlgorithm=command_result['signatureAlgorithm'],
+        issuer=command_result['issuer'].get('commonName'),
+        subject=command_result['subject'].get('commonName'),
+        publicKeyLengh=int(command_result['subjectPublicKeyInfo'].get('publicKeySize')),
+        publicKeyAlgorithm=command_result['subjectPublicKeyInfo'].get('publicKeyAlgorithm'),
+        signatureAlgorithm=command_result.get('signatureAlgorithm'),
         notValidBefore=not_before,
         notValidAfter=not_after,
-        selfSigned=trusted_result['selfSigned'],
-        trusted=trusted_result['trusted'],
+        selfSigned=trusted_result.get('selfSigned'),
+        trusted=trusted_result.get('trusted'),
         expired=False
     )
 
@@ -79,12 +71,11 @@ def _parse_cert(command_result):
 
 def _is_trusted(signed_result):
     trusted_result = dict(
-        selfSigned=False,
+        selfSigned=True,
         trusted=False
     )
-    if signed_result['Google'] == 'self signed certificate':
-        trusted_result['selfSigned'] = True
-    elif signed_result['Google'] == 'ok':
+    if signed_result.get('Google') == 'ok':
+        trusted_result['selfSigned'] = False
         trusted_result['trusted'] = True
     return trusted_result
 
@@ -143,7 +134,8 @@ def _parse_ciphers(result, protocol, public_key_size):
                     cipher_dict["curve"] = "P-%s" % dh_info.get("GroupSize")
                     cipher_dict["kxStrength"] = int(dh_info.get("GroupSize"))
             else:
-                cipher_dict["kxStrength"] = int(public_key_size)
+                if public_key_size:
+                    cipher_dict["kxStrength"] = int(public_key_size)
 
             ciphers_list.append(cipher_dict)
 
@@ -159,9 +151,13 @@ def main():
     mdb = Database()
 
     tls_ver = ['tlsv1_2', 'tlsv1_1', 'sslv3', 'sslv2', 'tlsv1']
-
+    count = 1
+    start_time = time()
     while True:
         result = qm.next_result()
+
+        if count == 1:
+            start_time = time()
 
         scan_error = False
         scan_date = datetime.datetime.now()
@@ -179,37 +175,48 @@ def main():
             result_list = result.get('result')
 
             public_key_size = None
-            db_item = None
 
             #  move the result of certinfo to the front of the result_list
-            cert_result_index = 0
-            for result in result_list:
+            for i, result in enumerate(result_list):
                 if result.get('command') == 'certinfo':
-                    cert_result_index = result
-            result_list.insert(0, result_list.pop(result_list.index(cert_result_index)))
+                    result_list.insert(0, result_list.pop(i))
+                    break
 
             for command_result in result_list:
                 if command_result.get("error"):
                     # TODO handle error
                     continue
+
                 if command_result.get("command") in tls_ver:
                     ciphers.extend(_parse_ciphers(command_result, command_result.get("command"), public_key_size))
                 elif command_result["command"] == "certinfo":
                     public_key_size = command_result.get('subjectPublicKeyInfo').get('publicKeySize')
                     certificate = _parse_cert(command_result)
 
-                db_item = dict(
-                        scanError=scan_error,
-                        scanDate=scan_date,
-                        domain=domain,
-                        tld=tld,
-                        sources=sources,
-                        ciphers=ciphers,
-                        certificate=certificate,
-                )
+        db_item = dict(
+                scanError=scan_error,
+                scanDate=scan_date,
+                domain=domain,
+                tld=tld,
+                sources=sources,
+                ciphers=ciphers,
+                certificate=certificate,
+        )
 
-            mdb.insert_result(db_item)
+        mdb.insert_result(db_item)
 
+        write_to_console(domain, count, start_time)
+        count += 1
+
+def write_to_console(host, counter, start_time):
+    exec_time = time()-start_time
+
+    print("#"*50)
+    print('scan completed for target:     %s' % host)
+    print('total scans completed:         %s' % counter)
+    print('average scan time per target: {0:.2f} s'.format(exec_time/counter))
+    print('total scan time: {0:.2f} m'.format(exec_time/60))
+    print("#"*50)
 
 if __name__ == "__main__":
     main()
