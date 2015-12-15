@@ -35,7 +35,7 @@ def getAlexaCSV():
     print("Finished downloading alexa top 1 million zip. Starting extraction...")
     #unzips
     z = zipfile.ZipFile(StringIO.StringIO(r.content))
-    if not os._exists("../data/"):
+    if not os.path.exists("../data/"):
         os.mkdir("../data/")
     z.extractall("../data/")
     print("Finished extracting alexa top 1 million zip. Sending list to queue_manager...")
