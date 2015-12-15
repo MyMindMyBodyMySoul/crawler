@@ -66,13 +66,13 @@ class WorkerProcess(Process):
                             result["command"] = command
                             result["error"] = False
                         else:
-                            result = dict(error=True, err_msg="command is not supported")
+                            result = dict(command=command, error=True, err_msg="command is not supported")
 
                     elif isinstance(result, str):
-                        result = dict(error=True, err_msg=result)
+                        result = dict(command=command, error=True, err_msg=result)
 
                     else:
-                        result = dict(error=True, err_msg="command is not supported")
+                        result = dict(command=command, error=True, err_msg="command is not supported")
 
                     result_dict["result"].append(result)
 
