@@ -5,7 +5,7 @@ This module fetches results out of the queue_manager and formats it in JSON to a
 
 from server.queue_manager import QueueClient
 from pymongo import MongoClient, errors
-from time import sleep, time
+from time import sleep
 import datetime
 from tld import get_tld
 from cipher_desc import CIPHER_DESC
@@ -151,14 +151,10 @@ def main():
     mdb = Database()
 
     tls_ver = ['tlsv1_2', 'tlsv1_1', 'sslv3', 'sslv2', 'tlsv1']
-    count = 1
-    start_time = time()
+
     while True:
         try:
             result = qm.next_result()
-
-            if count == 1:
-                start_time = time()
 
             scan_error = False
             scan_date = datetime.datetime.now()
@@ -206,22 +202,9 @@ def main():
 
             mdb.insert_result(db_item)
 
-            write_to_console(domain, count, start_time)
-            count += 1
-
         except Exception as e:
             print(e)
 
-
-def write_to_console(host, counter, start_time):
-    exec_time = time()-start_time
-
-    print("#"*50)
-    print('scan completed for target:     %s' % host)
-    print('total scans completed:         %s' % counter)
-    print('average scan time per target: {0:.2f} s'.format(exec_time/counter))
-    print('total scan time: {0:.2f} m'.format(exec_time/60))
-    print("#"*50)
 
 if __name__ == "__main__":
     main()

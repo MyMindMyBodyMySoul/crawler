@@ -14,6 +14,7 @@ The server bind to address and port, which are specified in :mod:`settings`.
 from multiprocessing.managers import BaseManager
 from threading import Lock, Condition
 import settings
+from time import time
 
 try:
     from queue import Queue, Empty
@@ -49,6 +50,10 @@ class QueueManager(object):
         # Definitions for Mutex-locks
         self._is_filling = False
         self._filling_condition = Condition()
+
+        # used for measurements
+        self._result_counter = 1
+        self._start_time = time()
 
     def __call__(self, *args, **kwargs):
         return self
@@ -190,6 +195,20 @@ class QueueManager(object):
         Adding a result to result_queue.
         :param result: the sslyze result to pe added to the _result.queue
         """
+        if self._result_counter == 1:
+            self._start_time = time()
+
+        exec_time = time() - self._start_time
+
+        print("#"*50)
+        print('scan completed for target:     %s' % result.get("target")[0])
+        print('total scans completed:         %s' % self._result_counter)
+        print('average scan time per target: {0:.2f} s'.format(exec_time/self._result_counter))
+        print('total scan time: {0:.2f} m'.format(exec_time/60))
+        print('result_queue size: %s' % self._result_queue.qsize())
+        print("#"*50)
+
+        self._result_counter += 1
         self._result_queue.put(result)
 
     def put_user_result(self, result, user_id):
