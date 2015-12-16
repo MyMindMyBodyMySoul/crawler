@@ -154,59 +154,64 @@ def main():
     count = 1
     start_time = time()
     while True:
-        result = qm.next_result()
+        try:
+            result = qm.next_result()
 
-        if count == 1:
-            start_time = time()
+            if count == 1:
+                start_time = time()
 
-        scan_error = False
-        scan_date = datetime.datetime.now()
-        domain = result.get("target")[0]
-        tld = get_tld('https://' + domain, as_object=True).suffix
-        sources = result.get("source")
-        ciphers = []
-        certificate = {}
+            scan_error = False
+            scan_date = datetime.datetime.now()
+            domain = result.get("target")[0]
+            tld = get_tld('https://' + domain, as_object=True, fail_silently=True).suffix
+            sources = result.get("source")
+            ciphers = []
+            certificate = {}
 
-        if result.get("error"):
-            # print(result.get("err_msg"))
-            scan_error = True
+            if result.get("error"):
+                # print(result.get("err_msg"))
+                scan_error = True
 
-        else:
-            result_list = result.get('result')
+            else:
+                result_list = result.get('result')
 
-            public_key_size = None
+                public_key_size = None
 
-            #  move the result of certinfo to the front of the result_list
-            for i, result in enumerate(result_list):
-                if result.get('command') == 'certinfo':
-                    result_list.insert(0, result_list.pop(i))
-                    break
+                #  move the result of certinfo to the front of the result_list
+                for i, result in enumerate(result_list):
+                    if result.get('command') == 'certinfo':
+                        result_list.insert(0, result_list.pop(i))
+                        break
 
-            for command_result in result_list:
-                if command_result.get("error"):
-                    # TODO handle error
-                    continue
+                for command_result in result_list:
+                    if command_result.get("error"):
+                        # TODO handle error
+                        continue
 
-                if command_result.get("command") in tls_ver:
-                    ciphers.extend(_parse_ciphers(command_result, command_result.get("command"), public_key_size))
-                elif command_result["command"] == "certinfo":
-                    public_key_size = command_result.get('subjectPublicKeyInfo').get('publicKeySize')
-                    certificate = _parse_cert(command_result)
+                    if command_result.get("command") in tls_ver:
+                        ciphers.extend(_parse_ciphers(command_result, command_result.get("command"), public_key_size))
+                    elif command_result["command"] == "certinfo":
+                        public_key_size = command_result.get('subjectPublicKeyInfo').get('publicKeySize')
+                        certificate = _parse_cert(command_result)
 
-        db_item = dict(
-                scanError=scan_error,
-                scanDate=scan_date,
-                domain=domain,
-                tld=tld,
-                sources=sources,
-                ciphers=ciphers,
-                certificate=certificate,
-        )
+            db_item = dict(
+                    scanError=scan_error,
+                    scanDate=scan_date,
+                    domain=domain,
+                    tld=tld,
+                    sources=sources,
+                    ciphers=ciphers,
+                    certificate=certificate,
+            )
 
-        mdb.insert_result(db_item)
+            mdb.insert_result(db_item)
 
-        write_to_console(domain, count, start_time)
-        count += 1
+            write_to_console(domain, count, start_time)
+            count += 1
+
+        except Exception as e:
+            print(e)
+
 
 def write_to_console(host, counter, start_time):
     exec_time = time()-start_time
