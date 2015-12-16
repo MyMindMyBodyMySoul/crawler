@@ -33,10 +33,14 @@ class QueueManager(object):
             and get an instance of this class.
     """
     def __init__(self):
+        # Threshold for result_queue size
+        self._result_queue_threshold = 500
+
+        # Init queues
         self._host_queue = Queue()
         self._user_queue = Queue()
         self._user_result_queue = Queue()
-        self._result_queue = Queue()
+        self._result_queue = Queue(self._result_queue_threshold)
 
         self._user_result_dict = {}
         self._host_source_dict = {}
@@ -64,6 +68,9 @@ class QueueManager(object):
 
         :return str: hostname e.g. "google.com"
         """
+        if self._result_queue.full():
+            print("result_queue full, check if result_worker is running")
+            return None, None
 
         if not self._user_queue.empty():
             # Trap for prioritizing the user_queue
