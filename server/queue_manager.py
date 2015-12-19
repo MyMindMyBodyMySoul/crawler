@@ -40,7 +40,7 @@ class QueueManager(object):
         self._host_queue = Queue()
         self._user_queue = Queue()
         self._user_result_queue = Queue()
-        self._result_queue = Queue(self._result_queue_threshold)
+        self._result_queue = Queue()
 
         self._user_result_dict = {}
         self._host_source_dict = {}
@@ -68,7 +68,7 @@ class QueueManager(object):
 
         :return str: hostname e.g. "google.com"
         """
-        if self._result_queue.full():
+        if self._result_queue.qsize() >= self._result_queue_threshold:
             print("result_queue full, check if result_worker is running")
             return None, None
 
