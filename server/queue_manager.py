@@ -14,11 +14,14 @@ The server bind to address and port, which are specified in :mod:`settings`.
 from multiprocessing.managers import BaseManager
 from threading import Lock, Condition
 import settings
+from time import time
 
 try:
     from queue import Queue, Empty
+    import cPickle, os
 except ImportError:
     from Queue import Queue, Empty
+    import cPickle, os
 
 
 class QueueManager(object):
@@ -32,6 +35,16 @@ class QueueManager(object):
             and get an instance of this class.
     """
     def __init__(self):
+        # Location where the dumpfile will be created
+        self._dump_location = '../data/queue.dmp'
+
+        # Threshold value describing intervals in which dumps will be created
+        self._dump_threshold = 500
+
+        # Threshold for result_queue size
+        self._result_queue_threshold = 500
+
+        # Init queues
         self._host_queue = Queue()
         self._user_queue = Queue()
         self._user_result_queue = Queue()
@@ -42,6 +55,7 @@ class QueueManager(object):
 
         self._counter = 0
         self._new_list_holder = None
+        self._current_list_holder = None
 
         # Initial value of -1 is preventing getting trapped in the put_new_list function on startup
         self._times_fully_parsed = -1
@@ -50,15 +64,82 @@ class QueueManager(object):
         self._is_filling = False
         self._filling_condition = Condition()
 
+        # used for measurements
+        self._result_counter = 1
+        self._start_time = time()
+
+        # Check if dump file exists
+        self.read_dump()
+
     def __call__(self, *args, **kwargs):
         return self
 
+    def create_dump(self):
+        """
+        Function creates a dump of the current_list_holder and counter variable in data directory
+        First the counter variable is pickled, current_list_holder is pickled last.
+        """
+        print("creating dump at count: "+str(self._counter))
+        try:
+            dumpFile = open(self._dump_location,'w+b')
+            try:
+                cPickle.dump(self._counter, dumpFile, cPickle.HIGHEST_PROTOCOL)
+                cPickle.dump(self._current_list_holder, dumpFile, cPickle.HIGHEST_PROTOCOL)
+            except (cPickle.PickleError,cPickle.PicklingError) as pe:
+                print pe
+            finally:
+                dumpFile.close()
+        except OSError as oe:
+                    print(oe)
+
+
+
+    def read_dump(self):
+        """
+        Function will look for a dump file in Data directory, read it and
+        initialize the host_queue in queue_manager accordingly
+            .. note::
+                This function assumes that counter variable has been pickled first and the
+                list representing the host_queue last.
+        """
+        if os.path.exists(self._dump_location):
+            print("Found dump file.")
+            try:
+                fileIn = open(self._dump_location,'rb')
+                try:
+                    lastCounter = cPickle.load(fileIn)
+                    self._current_list_holder = cPickle.load(fileIn)
+                    print("Last iteration stopped at entry: "+str(lastCounter)+": "+str(self._current_list_holder[lastCounter]))
+                    if(lastCounter != 0):
+                        # Create a list in which already scanned URLs are appended at the end of the list
+                        tempList = self._current_list_holder[lastCounter : ]+self._current_list_holder[0 : lastCounter]
+                        self._current_list_holder = tempList
+                    self.put_new_list(self._current_list_holder)
+
+                except (cPickle.UnpicklingError, cPickle.UnpicklingError) as pe:
+                    print(pe)
+                finally:
+                    fileIn.close()
+            except OSError as oe:
+                print(oe)
+        else:
+            print("No dump file found. Continuing with regular operation")
+            return
+
+
+
     def next_host(self):
         """
-        Getting next hostname of the appropriate queue.
+        Getting next hostname from the appropriate queue.
 
         :return str: hostname e.g. "google.com"
         """
+        if (self._counter % self._dump_threshold == 0):
+            self.create_dump()
+
+        if self._result_queue.qsize() >= self._result_queue_threshold:
+            print("result_queue full, check if result_worker is running")
+            return None, None
 
         if not self._user_queue.empty():
             # Trap for prioritizing the user_queue
@@ -147,6 +228,7 @@ class QueueManager(object):
         print("new list was added")
 
         self._times_fully_parsed = 0
+        self._current_list_holder = self._new_list_holder
         self._new_list_holder = None
         self._is_filling = False
 
@@ -190,6 +272,20 @@ class QueueManager(object):
         Adding a result to result_queue.
         :param result: the sslyze result to pe added to the _result.queue
         """
+        if self._result_counter == 1:
+            self._start_time = time()
+
+        exec_time = time() - self._start_time
+
+        print("#"*50)
+        print('scan completed for target:     %s' % result.get("target")[0])
+        print('total scans completed:         %s' % self._result_counter)
+        print('average scan time per target: {0:.2f} s'.format(exec_time/self._result_counter))
+        print('total scan time: {0:.2f} m'.format(exec_time/60))
+        print('result_queue size: %s' % self._result_queue.qsize())
+        print("#"*50)
+
+        self._result_counter += 1
         self._result_queue.put(result)
 
     def put_user_result(self, result, user_id):
