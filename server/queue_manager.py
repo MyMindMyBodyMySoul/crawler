@@ -13,6 +13,7 @@ The server bind to address and port, which are specified in :mod:`settings`.
 
 from multiprocessing.managers import BaseManager
 from threading import Lock, Condition
+from thread import start_new_thread
 import settings
 from time import time
 
@@ -69,7 +70,7 @@ class QueueManager(object):
         self._start_time = time()
 
         # Check if dump file exists
-        self.read_dump()
+        start_new_thread(self.read_dump,())
 
     def __call__(self, *args, **kwargs):
         return self
@@ -81,7 +82,7 @@ class QueueManager(object):
         """
         print("creating dump at count: "+str(self._counter))
         try:
-            dumpFile = open(self._dump_location,'w+b')
+            dumpFile = open(self._dump_location,'wb+')
             try:
                 cPickle.dump(self._counter, dumpFile, cPickle.HIGHEST_PROTOCOL)
                 cPickle.dump(self._current_list_holder, dumpFile, cPickle.HIGHEST_PROTOCOL)
@@ -91,6 +92,9 @@ class QueueManager(object):
                 dumpFile.close()
         except OSError as oe:
                     print(oe)
+        except Exception as ex:
+                #Catch everything unexpected
+            print("Unexpected error while creating dumpfile "+ str(ex))
 
 
 
@@ -105,7 +109,7 @@ class QueueManager(object):
         if os.path.exists(self._dump_location):
             print("Found dump file.")
             try:
-                fileIn = open(self._dump_location,'rb')
+                fileIn = open(self._dump_location,'rb+')
                 try:
                     lastCounter = cPickle.load(fileIn)
                     self._current_list_holder = cPickle.load(fileIn)
@@ -116,15 +120,18 @@ class QueueManager(object):
                         self._current_list_holder = tempList
                     self.put_new_list(self._current_list_holder)
 
-                except (cPickle.UnpicklingError, cPickle.UnpicklingError) as pe:
+                except (cPickle.UnpicklingError, cPickle.UnpickleableError) as pe:
                     print(pe)
                 finally:
                     fileIn.close()
+                    #os.remove(self._dump_location)
             except OSError as oe:
                 print(oe)
+            except Exception as ex:
+                # Catch everything unexpected
+                print("Unexpected error while reading dump file: "+str(ex))
         else:
             print("No dump file found. Continuing with regular operation")
-            return
 
 
 
@@ -134,8 +141,8 @@ class QueueManager(object):
 
         :return str: hostname e.g. "google.com"
         """
-        if (self._counter % self._dump_threshold == 0):
-            self.create_dump()
+        if (self._counter > 0 and self._counter % self._dump_threshold == 0):
+            start_new_thread(self.create_dump,())
 
         if self._result_queue.qsize() >= self._result_queue_threshold:
             print("result_queue full, check if result_worker is running")
