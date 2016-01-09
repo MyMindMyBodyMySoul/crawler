@@ -36,8 +36,8 @@ class QueueManager(object):
             and get an instance of this class.
     """
     def __init__(self):
-        # Location where the dumpfile will be created
-        self._dump_location = '../data/queue.dmp'
+        # Location and filename of the dumpfile
+        self._dump_location = os.path.join(os.path.dirname(__file__),'..','data','queue.dmp')
 
         # Threshold value describing intervals in which dumps will be created
         self._dump_threshold = 500
@@ -91,10 +91,10 @@ class QueueManager(object):
             finally:
                 dumpFile.close()
         except OSError as oe:
-                    print(oe)
+                    print oe
         except Exception as ex:
                 #Catch everything unexpected
-            print("Unexpected error while creating dumpfile "+ str(ex))
+            print("Unexpected error while creating dumpfile: ",ex)
 
 
 
@@ -121,15 +121,14 @@ class QueueManager(object):
                     self.put_new_list(self._current_list_holder)
 
                 except (cPickle.UnpicklingError, cPickle.UnpickleableError) as pe:
-                    print(pe)
+                    print pe
                 finally:
                     fileIn.close()
-                    #os.remove(self._dump_location)
             except OSError as oe:
-                print(oe)
+                print oe
             except Exception as ex:
                 # Catch everything unexpected
-                print("Unexpected error while reading dump file: "+str(ex))
+                print("Unexpected error while reading dump file: ",ex)
         else:
             print("No dump file found. Continuing with regular operation")
 
