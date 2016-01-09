@@ -9,6 +9,7 @@ from time import sleep
 import datetime
 from tld import get_tld
 from cipher_desc import CIPHER_DESC
+import socket
 
 
 class Database(object):
@@ -116,6 +117,10 @@ def _parse_ciphers(result, protocol, public_key_size):
             bits = result_list.get(ssl_cipher)[1]
             dh_info = result_list.get(ssl_cipher)[2]
             cipher_desc = CIPHER_DESC.get(ssl_cipher)
+            #  check for the ephemeral flag
+            ephemeral_flag = False
+            if ssl_cipher.startswith('ECDH') or ssl_cipher.startswith('DHE'):
+                ephemeral_flag = True
 
             cipher_dict = dict(
                 cipher=ssl_cipher,
@@ -126,7 +131,8 @@ def _parse_ciphers(result, protocol, public_key_size):
                 au=cipher_desc.get("au"),
                 enc=cipher_desc.get("enc"),
                 mac=cipher_desc.get("mac"),
-                export=cipher_desc.get("export")
+                export=cipher_desc.get("export"),
+                ephemeral=ephemeral_flag
             )
 
             if dh_info:
@@ -159,7 +165,10 @@ def main():
             scan_error = False
             scan_date = datetime.datetime.now()
             domain = result.get("target")[0]
-            tld = get_tld('https://' + domain, as_object=True, fail_silently=True).suffix
+            if socket.gethostbyname(domain) == domain:
+                tld = None
+            else:
+                tld = get_tld('https://' + domain, as_object=True, fail_silently=True).suffix
             sources = result.get("source")
             ciphers = []
             certificate = {}
