@@ -119,7 +119,7 @@ def _parse_ciphers(result, protocol, public_key_size):
             cipher_desc = CIPHER_DESC.get(ssl_cipher)
             #  check for the ephemeral flag
             ephemeral_flag = False
-            if ssl_cipher.startswith('ECDH') or ssl_cipher.startswith('DHE'):
+            if ssl_cipher.startswith('ECDHE') or ssl_cipher.startswith('DHE'):
                 ephemeral_flag = True
 
             cipher_dict = dict(
