@@ -1,10 +1,13 @@
 from server.queue_manager import QueueClient
 import requests, zipfile, StringIO, time, datetime
 import os
+import urllib, multiprocessing
+from lxml import etree
 
 alexa_splits = [1000000, 1000, 100]
 nextDownloadDate = datetime.date.today()
 csvPath = "../data/top-1m.csv"
+
 
 def datedAlexaCSV(split_list):
     """
@@ -35,35 +38,46 @@ def datedAlexaCSV(split_list):
     return ret_list
 
 
-# downloads and unzips AlexaCSV and return the date
 def getAlexaCSV():
+    """
+    Downloads the alexa top 1 million list.
+
+    :return: Todays date
+    """
     updateDownloadDate()
     #downloads from url
     r = requests.get("http://s3.amazonaws.com/alexa-static/top-1m.csv.zip")
     print("Finished downloading alexa top 1 million zip. Starting extraction...")
     #unzips
     z = zipfile.ZipFile(StringIO.StringIO(r.content))
+    #checks if folder "data" exists, will be created if not
     if not os.path.exists("../data/"):
         os.mkdir("../data/")
     z.extractall("../data/")
-    print("Finished extracting alexa top 1 million zip. Sending list to queue_manager...")
-    #moves file from "crawler" to "crawler/data"
+    print("Finished extracting alexa top 1 million zip. Building list...")
     #get date as "dd.mm.yyyy"
     today = time.strftime("%d.%m.%Y")
     return today
 
+
 def updateDownloadDate():
-    now = datetime.datetime.today()#get todays date
-    day = getattr(now, 'day')#get todays day
-    month = getattr(now, 'month')#get todays month
-    year = getattr(now, 'year')#get todays year
-    if day > 20:#day > 20 -> new list will be available on 20th next month
+    """
+    Creates a date, that will be used to check if a new version of the alexa top-1m.csv is available.
+    The new list should be available on 20th every month.
+
+    Changes variable nextDownloadDate to the date, when a new list should be available.
+    """
+    now = datetime.datetime.today()
+    day = getattr(now, 'day')
+    month = getattr(now, 'month')
+    year = getattr(now, 'year')
+    if day > 20:
         month = month + 1
         if month > 12:
             month = 1
             year = year + 1
     day = 20
-    nextDownloadDate = datetime.date(year,month,day)#creating a datetime.date object that tells, when to download a new list
+    nextDownloadDate = datetime.date(year,month,day)
 
 
 def joinLists(listA, listB):
@@ -99,12 +113,149 @@ def joinListOfLists(CountryLists):
     :param CountryLists: List of URL-Source-Lists. MUST NOT BE EMPTY!
     :return: The joined URL-Source-List.
     """
+    print("Starting JoinListOfLists")
+    print(len(CountryLists))
     while len(CountryLists) > 1:
         m = len(CountryLists)/2 - 1
         while m >= 0:
             joinLists(CountryLists[m], CountryLists.pop())
             m -= 1
+    print(len(CountryLists))
+    print(len(CountryLists[0]))
     return CountryLists[0]
+
+
+class DownLoader():
+    '''
+    Downloader to get all necessary information.
+    '''
+
+    def __init__(self, url):
+        """
+        url contains the url, that will be downloaded.
+        contents contains the content of the url, after it is downloaded
+
+        :param url: url, that will be downloaded
+        :return: NULL
+        """
+        self.url = url
+        self.contents = ''
+
+    def download(self):
+        """
+        Creates a browser to get all necessary information. This information will be stored in self.contents
+        :return: NULL
+        """
+
+        #print self.url
+        browser = urllib.urlopen(self.url)
+        response = browser.getcode()
+        if response == 200: #success
+            self.contents = browser.read()
+
+
+class alexaParser(DownLoader):
+    '''
+    Class for parsing alexa.com/topsites/countries*
+    '''
+
+    def __init__(self,url):
+        """
+
+        :param url: url, that will be downloaded
+        :return: NULL
+        """
+        DownLoader.__init__(self,url)
+        self.topsiteShort = ''
+        self.topsiteName = ''
+
+    def getSiteNames(self):
+        """
+        Downloads the specified url and fetches the links to all countrie top 500 sites.
+        This links will be stored in self.topsiteShort
+        :return: NULL
+        """
+        self.download()
+        if self.contents:
+            tree = etree.HTML(self.contents)
+            self.topsiteShort = tree.xpath("//div/div/ul/li//a/@href")#Get links to contrie sites
+            self.topsiteName = tree.xpath("/html/body//div/div/ul/li/a/text()")#Get countrieNames
+
+
+def getContent(shortName, countrieName, today):
+    """
+    Fetches all sites in the top 500 for the country with short name shortName.
+
+    :param shortName: The two Letter shortName of the wanted country
+    :param countrieName: full name of the country
+    :param today: todays date
+    :return: a sorted list with all 500 entries as [["url1",[date+countryName]],"url2",[date+countryName],...]
+    """
+    parser = alexaParser("")
+    sites=[]
+    for i in range(0,20):
+        if i==0:
+            parser.url = "http://www.alexa.com/topsites/countries" + "/" +shortName
+            print("Starting to parse country: %s(%s)"%(countrieName, shortName))
+        else:
+            parser.url = "http://www.alexa.com/topsites/countries" +";"+str(i) +"/"+ shortName
+        parser.download()
+        if parser.contents:
+            tree = etree.HTML(parser.contents)
+            topsiteList = tree.xpath("//section/div/ul/li/div/p/a/text()")
+            sites.extend(topsiteList)
+    sites.sort()
+    returnValue=[]
+    for url in sites:
+                sources = [[url,[today+countrieName]]]
+                returnValue.extend(sources)
+    return returnValue
+
+
+def startTop500Parsing():
+    """
+    Contains all necessary information to start the top 500 parsing.
+
+    :return: returns a multi-dimensional array with all countries and their top 500 websites, as
+             a sorted list with all 500 entries as [[["url1",[date+countryName1]],"url2",[date+countryName1],...],
+                                                    [["url1",[date+countryName2]],"url2",[date+countryName2],...],
+                                                                     ...                                         ]
+
+    """
+    today = time.strftime("%d.%m.%Y")
+    url = "http://www.alexa.com/topsites/countries"
+    alexa_parser = alexaParser(url)
+    alexa_parser.getSiteNames()
+    #fetching shortName out of the link
+    for i in range(0,len(alexa_parser.topsiteShort)):
+        object = alexa_parser.topsiteShort[i]
+        alexa_parser.topsiteShort[i] = object[-2:]
+    pool = multiprocessing.Pool(processes=20)
+    output = [pool.apply_async(getContent,args=(alexa_parser.topsiteShort[x],alexa_parser.topsiteName[x],today,)) \
+              for x in range(0,len(alexa_parser.topsiteShort))]
+    results = [p.get() for p in output]
+    resultValues = []
+    for listComponent in results:
+        resultValues.extend([listComponent])
+    #print(resultValues)
+    return resultValues
+
+
+def fetchInput(queue_manager):
+    """
+    Downloads top-1m.csv, parses top500 country lists, merges them and sends them to queue_manager.
+    """
+
+    """
+    Can be used, if merging of the lists works
+
+    #top500ListOfLists = startTop500Parsing()
+    #top500List = joinListOfLists(top500ListOfLists)
+    #top1MioList = datedAlexaCSV(alexa_splits)
+    #queue_manager.put_new_list(joinLists(top1MioList,top500List))
+    """
+    queue_manager.put_new_list(datedAlexaCSV(alexa_splits))
+    print("Finished building and sending list.")
 
 
 if __name__ == "__main__":
@@ -112,12 +263,12 @@ if __name__ == "__main__":
     c = QueueClient()
     # get appropriate queue from QueueClient
     queue_manager = c.queue_manager()
-    queue_manager.put_new_list(datedAlexaCSV(alexa_splits))
+    fetchInput(queue_manager)
     while(True):
         t = datetime.datetime.today()#converting datetime.datetime.today object into datetime.date object
         today = datetime.date(t.year,t.month,t.day)#converting datetime.datetime.today object into datetime.date object
         if today > nextDownloadDate:
-            queue_manager.put_new_list(datedAlexaCSV(alexa_splits))
+            fetchInput(queue_manager)
         os.remove(csvPath)
         print("sleeping now")
         time.sleep(86400)#sleeps for 86400 seconds, ~1 day
