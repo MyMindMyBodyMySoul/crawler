@@ -6,8 +6,8 @@ from lxml import etree
 
 alexa_splits = [1000000, 1000, 100]
 nextDownloadDate = datetime.date.today()
-csvPath = "../data/top-1m.csv"
-
+csvPath = os.path.join(os.path.dirname(__file__),'..','data','top-1m.csv')
+dataFolder = os.path.join(os.path.dirname(__file__),'..','data')
 
 def datedAlexaCSV(split_list):
     """
@@ -51,9 +51,9 @@ def getAlexaCSV():
     #unzips
     z = zipfile.ZipFile(StringIO.StringIO(r.content))
     #checks if folder "data" exists, will be created if not
-    if not os.path.exists("../data/"):
-        os.mkdir("../data/")
-    z.extractall("../data/")
+    if not os.path.exists(dataFolder):
+        os.mkdir(dataFolder)
+    z.extractall(dataFolder)
     print("Finished extracting alexa top 1 million zip. Building list...")
     #get date as "dd.mm.yyyy"
     today = time.strftime("%d.%m.%Y")
