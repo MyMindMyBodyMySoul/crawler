@@ -8,7 +8,7 @@ from pymongo import MongoClient, errors
 from time import sleep
 import datetime
 from tld import get_tld
-from cipher_desc import CIPHER_DESC
+from helper.cipher_desc import CIPHER_DESC
 import socket
 
 
