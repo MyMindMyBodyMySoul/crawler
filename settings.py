@@ -16,9 +16,8 @@ MODULE_LIST = [
     "worker.input_worker",
     "worker.result_worker",
     "worker.sslyze_worker",
-    "helper.status"
+    "helper.status",
 ]
-
 
 ##########################
 # LOGGING                #
@@ -30,15 +29,14 @@ LOG_MODULES = MODULE_LIST
 #: the file in which all output will be written. If None it goes to stdout.
 LOG_FILE = None
 
-
 ##########################
 # SERVER                 #
 ##########################
 
-#: the bind address of the :mod:`~server.web`.
+#: the bind address of the :mod:`~server.web` server.
 WEB_SERVER_ADDRESS = 'localhost'
 
-#: the bind port of the :mod:`~server.web`.
+#: the bind port of the :mod:`~server.web` server.
 WEB_SERVER_PORT = 50002
 
 #: the bind address of the :class:`~server.queue_manager.QueueServer`.
@@ -49,7 +47,6 @@ SERVER_PORT = 50001
 
 #: the authentication string of the :class:`~server.queue_manager.QueueServer`.
 SERVER_AUTH = b'abc'
-
 
 ##########################
 # SSLYZE                 #
@@ -78,7 +75,6 @@ COMMAND_LIST = [
     # "compression",
     "certinfo",
 ]
-
 
 #: this are shared settings used by sslyze.
 #:   For details see `SSLyze <https://github.com/nabla-c0d3/sslyze>`_.
@@ -115,8 +111,3 @@ SHARED_SETTINGS = {
     'timeout': 5,
     'xmpp_to': None
 }
-
-
-
-
-
