@@ -138,8 +138,8 @@
 
 <span class="n">alexa_splits</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1000000</span><span class="p">,</span> <span class="mi">1000</span><span class="p">,</span> <span class="mi">100</span><span class="p">]</span>
 <span class="n">nextDownloadDate</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">date</span><span class="o">.</span><span class="n">today</span><span class="p">()</span>
-<span class="n">csvPath</span> <span class="o">=</span> <span class="s">&quot;../data/top-1m.csv&quot;</span>
-
+<span class="n">csvPath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">__file__</span><span class="p">),</span><span class="s">&#39;..&#39;</span><span class="p">,</span><span class="s">&#39;data&#39;</span><span class="p">,</span><span class="s">&#39;top-1m.csv&#39;</span><span class="p">)</span>
+<span class="n">dataFolder</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">__file__</span><span class="p">),</span><span class="s">&#39;..&#39;</span><span class="p">,</span><span class="s">&#39;data&#39;</span><span class="p">)</span>
 
 <div class="viewcode-block" id="datedAlexaCSV"><a class="viewcode-back" href="../../worker.input_worker.html#worker.input_worker.datedAlexaCSV">[docs]</a><span class="k">def</span> <span class="nf">datedAlexaCSV</span><span class="p">(</span><span class="n">split_list</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -183,9 +183,9 @@
     <span class="c">#unzips</span>
     <span class="n">z</span> <span class="o">=</span> <span class="n">zipfile</span><span class="o">.</span><span class="n">ZipFile</span><span class="p">(</span><span class="n">StringIO</span><span class="o">.</span><span class="n">StringIO</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">content</span><span class="p">))</span>
     <span class="c">#checks if folder &quot;data&quot; exists, will be created if not</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="s">&quot;../data/&quot;</span><span class="p">):</span>
-        <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="s">&quot;../data/&quot;</span><span class="p">)</span>
-    <span class="n">z</span><span class="o">.</span><span class="n">extractall</span><span class="p">(</span><span class="s">&quot;../data/&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">dataFolder</span><span class="p">):</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">dataFolder</span><span class="p">)</span>
+    <span class="n">z</span><span class="o">.</span><span class="n">extractall</span><span class="p">(</span><span class="n">dataFolder</span><span class="p">)</span>
     <span class="k">print</span><span class="p">(</span><span class="s">&quot;Finished extracting alexa top 1 million zip. Building list...&quot;</span><span class="p">)</span>
     <span class="c">#get date as &quot;dd.mm.yyyy&quot;</span>
     <span class="n">today</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s">&quot;</span><span class="si">%d</span><span class="s">.%m.%Y&quot;</span><span class="p">)</span>

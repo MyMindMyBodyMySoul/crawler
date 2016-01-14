@@ -139,13 +139,13 @@
 <dl class="data">
 <dt id="settings.MODULE_LIST">
 <code class="descname">MODULE_LIST</code><em class="property"> = ['server.queue_manager', 'server.web', 'worker.input_worker', 'worker.result_worker', 'worker.sslyze_worker', 'helper.status']</em><a class="headerlink" href="#settings.MODULE_LIST" title="Permalink to this definition">¶</a></dt>
-<dd><p>all modules in this list will be started in separate process</p>
+<dd><p>all modules in this list will be started in separate process.</p>
 </dd></dl>
 
 <dl class="data">
 <dt id="settings.LOG_MODULES">
 <code class="descname">LOG_MODULES</code><em class="property"> = ['server.queue_manager', 'server.web', 'worker.input_worker', 'worker.result_worker', 'worker.sslyze_worker', 'helper.status']</em><a class="headerlink" href="#settings.LOG_MODULES" title="Permalink to this definition">¶</a></dt>
-<dd><p>the output of the modules in this list will be logged to console or to file</p>
+<dd><p>the output of the modules in this list will be logged to console or to file.</p>
 </dd></dl>
 
 <dl class="data">
@@ -155,21 +155,33 @@
 </dd></dl>
 
 <dl class="data">
+<dt id="settings.WEB_SERVER_ADDRESS">
+<code class="descname">WEB_SERVER_ADDRESS</code><em class="property"> = 'localhost'</em><a class="headerlink" href="#settings.WEB_SERVER_ADDRESS" title="Permalink to this definition">¶</a></dt>
+<dd><p>the bind address of the <a class="reference internal" href="server.web.html#module-server.web" title="server.web"><code class="xref py py-mod docutils literal"><span class="pre">web</span></code></a> server.</p>
+</dd></dl>
+
+<dl class="data">
+<dt id="settings.WEB_SERVER_PORT">
+<code class="descname">WEB_SERVER_PORT</code><em class="property"> = 50002</em><a class="headerlink" href="#settings.WEB_SERVER_PORT" title="Permalink to this definition">¶</a></dt>
+<dd><p>the bind port of the <a class="reference internal" href="server.web.html#module-server.web" title="server.web"><code class="xref py py-mod docutils literal"><span class="pre">web</span></code></a> server.</p>
+</dd></dl>
+
+<dl class="data">
 <dt id="settings.SERVER_ADDRESS">
 <code class="descname">SERVER_ADDRESS</code><em class="property"> = 'localhost'</em><a class="headerlink" href="#settings.SERVER_ADDRESS" title="Permalink to this definition">¶</a></dt>
-<dd><p>the bind address of the <code class="xref py py-class docutils literal"><span class="pre">QueueServer</span></code></p>
+<dd><p>the bind address of the <a class="reference internal" href="server.queue_manager.html#server.queue_manager.QueueServer" title="server.queue_manager.QueueServer"><code class="xref py py-class docutils literal"><span class="pre">QueueServer</span></code></a>.</p>
 </dd></dl>
 
 <dl class="data">
 <dt id="settings.SERVER_PORT">
 <code class="descname">SERVER_PORT</code><em class="property"> = 50001</em><a class="headerlink" href="#settings.SERVER_PORT" title="Permalink to this definition">¶</a></dt>
-<dd><p>the bind port of the <code class="xref py py-class docutils literal"><span class="pre">QueueServer</span></code></p>
+<dd><p>the bind port of the <a class="reference internal" href="server.queue_manager.html#server.queue_manager.QueueServer" title="server.queue_manager.QueueServer"><code class="xref py py-class docutils literal"><span class="pre">QueueServer</span></code></a>.</p>
 </dd></dl>
 
 <dl class="data">
 <dt id="settings.SERVER_AUTH">
 <code class="descname">SERVER_AUTH</code><em class="property"> = 'abc'</em><a class="headerlink" href="#settings.SERVER_AUTH" title="Permalink to this definition">¶</a></dt>
-<dd><p>the authentication string of the <code class="xref py py-class docutils literal"><span class="pre">QueueServer</span></code></p>
+<dd><p>the authentication string of the <a class="reference internal" href="server.queue_manager.html#server.queue_manager.QueueServer" title="server.queue_manager.QueueServer"><code class="xref py py-class docutils literal"><span class="pre">QueueServer</span></code></a>.</p>
 </dd></dl>
 
 <dl class="data">

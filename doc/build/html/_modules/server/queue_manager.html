@@ -140,7 +140,7 @@
 <span class="sd">The server bind to address and port, which are specified in :mod:`settings`.</span>
 <span class="sd">    ::</span>
 
-<span class="sd">        $ python queue_manager.py</span>
+<span class="sd">    $ python queue_manager.py</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="kn">from</span> <span class="nn">multiprocessing.managers</span> <span class="kn">import</span> <span class="n">BaseManager</span>
@@ -166,6 +166,7 @@
 <span class="sd">            Instead use :class:`~queue_manager.QueueClient` to connect to the :class:`~queue_manager.QueueServer`</span>
 <span class="sd">            and get an instance of this class.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 
         <span class="c"># Threshold value describing intervals in which dumps will be created</span>
@@ -380,17 +381,17 @@
 <div class="viewcode-block" id="QueueManager.status"><a class="viewcode-back" href="../../server.queue_manager.html#server.queue_manager.QueueManager.status">[docs]</a>    <span class="k">def</span> <span class="nf">status</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">exec_time</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_start_time</span>
         <span class="n">status_dict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
-            <span class="n">host_queue_size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_host_queue</span><span class="o">.</span><span class="n">qsize</span><span class="p">(),</span>
-            <span class="n">counter</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_counter</span><span class="p">,</span>
-            <span class="n">completed</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_result_counter</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span>
-            <span class="n">scantime</span><span class="o">=</span><span class="n">exec_time</span><span class="p">,</span>
-            <span class="n">avgtime</span><span class="o">=</span><span class="n">exec_time</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">_result_counter</span><span class="p">,</span>
-            <span class="n">result_queue_size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_result_queue</span><span class="o">.</span><span class="n">qsize</span><span class="p">(),</span>
-            <span class="n">user_queue_size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_user_queue</span><span class="o">.</span><span class="n">qsize</span><span class="p">(),</span>
-            <span class="n">dump_limit</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_dump_threshold</span><span class="p">,</span>
-            <span class="n">result_queue_limit</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_result_queue_threshold</span><span class="p">,</span>
-            <span class="n">is_filling</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_is_filling</span><span class="p">,</span>
-            <span class="n">fully_scanned</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_times_fully_parsed</span>
+                <span class="n">host_queue_size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_host_queue</span><span class="o">.</span><span class="n">qsize</span><span class="p">(),</span>
+                <span class="n">counter</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_counter</span><span class="p">,</span>
+                <span class="n">completed</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_result_counter</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span>
+                <span class="n">scantime</span><span class="o">=</span><span class="n">exec_time</span><span class="p">,</span>
+                <span class="n">avgtime</span><span class="o">=</span><span class="n">exec_time</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">_result_counter</span><span class="p">,</span>
+                <span class="n">result_queue_size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_result_queue</span><span class="o">.</span><span class="n">qsize</span><span class="p">(),</span>
+                <span class="n">user_queue_size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_user_queue</span><span class="o">.</span><span class="n">qsize</span><span class="p">(),</span>
+                <span class="n">dump_limit</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_dump_threshold</span><span class="p">,</span>
+                <span class="n">result_queue_limit</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_result_queue_threshold</span><span class="p">,</span>
+                <span class="n">is_filling</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_is_filling</span><span class="p">,</span>
+                <span class="n">fully_scanned</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_times_fully_parsed</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">status_dict</span></div></div>
 
@@ -417,9 +418,9 @@
 <span class="sd">        # do something with queue_manager ...</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">address</span><span class="o">=</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">SERVER_ADDRESS</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">SERVER_PORT</span><span class="p">),</span>
                  <span class="n">authkey</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">SERVER_AUTH</span><span class="p">):</span>
-
         <span class="bp">self</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="s">&#39;queue_manager&#39;</span><span class="p">)</span>
         <span class="n">BaseManager</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">address</span><span class="o">=</span><span class="n">address</span><span class="p">,</span> <span class="n">authkey</span><span class="o">=</span><span class="n">authkey</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span></div>
@@ -429,6 +430,7 @@
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    The QueueServer ...</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="s">&#39;queue_manager&#39;</span><span class="p">,</span> <span class="nb">callable</span><span class="o">=</span><span class="n">QueueManager</span><span class="p">())</span>
         <span class="n">BaseManager</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">address</span><span class="o">=</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">SERVER_ADDRESS</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">SERVER_PORT</span><span class="p">),</span>
