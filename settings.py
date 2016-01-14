@@ -9,13 +9,14 @@ This module contains global settings for all modules.
 #: the path to your python executable. empty string for default system interpreter.
 PYTHON_PATH = ""
 
-#: all modules in this list will be started in separate process
+#: all modules in this list will be started in separate process.
 MODULE_LIST = [
     "server.queue_manager",
     "server.web",
     "worker.input_worker",
     "worker.result_worker",
-    "worker.sslyze_worker"
+    "worker.sslyze_worker",
+    "helper.status"
 ]
 
 
@@ -23,7 +24,7 @@ MODULE_LIST = [
 # LOGGING                #
 ##########################
 
-#: the output of the modules in this list will be logged to console or to file
+#: the output of the modules in this list will be logged to console or to file.
 LOG_MODULES = MODULE_LIST
 
 #: the file in which all output will be written. If None it goes to stdout.
@@ -34,16 +35,19 @@ LOG_FILE = None
 # SERVER                 #
 ##########################
 
+#: the bind address of the :mod:`~server.web`.
 WEB_SERVER_ADDRESS = 'localhost'
-WEB_SERVER_PORT = 8080
 
-#: the bind address of the :class:`~queue_manager.QueueServer`
+#: the bind port of the :mod:`~server.web`.
+WEB_SERVER_PORT = 50002
+
+#: the bind address of the :class:`~server.queue_manager.QueueServer`.
 SERVER_ADDRESS = 'localhost'
 
-#: the bind port of the :class:`~queue_manager.QueueServer`
+#: the bind port of the :class:`~server.queue_manager.QueueServer`.
 SERVER_PORT = 50001
 
-#: the authentication string of the :class:`~queue_manager.QueueServer`
+#: the authentication string of the :class:`~server.queue_manager.QueueServer`.
 SERVER_AUTH = b'abc'
 
 
