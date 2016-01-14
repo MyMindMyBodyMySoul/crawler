@@ -94,12 +94,13 @@ def joinLists(listA, listB):
     a = len(listA) - 1
     b = len(listB) - 1
     while b >= 0:
-        if listA[a][0] == listB[b][0]:
-            listA[a][1].extend(listB[b][1])
-            a -= 1
-            b -= 1
-        elif listA[a][0] < listB[b][0]:
+        if a < 0 or listA[a][0] < listB[b][0]:
             listA.insert(a+1, listB[b])
+            b -= 1
+        elif listA[a][0] == listB[b][0]:
+            listA[a][1].extend(listB[b][1])
+            listA[a][1].sort()
+            a -= 1
             b -= 1
         else:
             a -= 1
@@ -113,15 +114,10 @@ def joinListOfLists(CountryLists):
     :param CountryLists: List of URL-Source-Lists. MUST NOT BE EMPTY!
     :return: The joined URL-Source-List.
     """
-    print("Starting JoinListOfLists")
-    print(len(CountryLists))
     while len(CountryLists) > 1:
-        m = len(CountryLists)/2 - 1
-        while m >= 0:
-            joinLists(CountryLists[m], CountryLists.pop())
-            m -= 1
-    print(len(CountryLists))
-    print(len(CountryLists[0]))
+        m = len(CountryLists)/2
+        for i in range(0, m):
+            joinLists(CountryLists[i], CountryLists.pop())
     return CountryLists[0]
 
 
@@ -189,7 +185,7 @@ def getContent(shortName, countrieName, today):
     :param shortName: The two Letter shortName of the wanted country
     :param countrieName: full name of the country
     :param today: todays date
-    :return: a sorted list with all 500 entries as [["url1",[date+countryName]],"url2",[date+countryName],...]
+    :return: a sorted list with all 500 entries as [["url1",[date+countryName]],["url2",[date+countryName]],...]
     """
     parser = alexaParser("")
     sites=[]
@@ -217,8 +213,8 @@ def startTop500Parsing():
     Contains all necessary information to start the top 500 parsing.
 
     :return: returns a multi-dimensional array with all countries and their top 500 websites, as
-             a sorted list with all 500 entries as [[["url1",[date+countryName1]],"url2",[date+countryName1],...],
-                                                    [["url1",[date+countryName2]],"url2",[date+countryName2],...],
+             a sorted list with all 500 entries as [[["url1",[date+countryName1]],["url2",[date+countryName1]],...],
+                                                    [["url1",[date+countryName2]],["url2",[date+countryName2]],...],
                                                                      ...                                         ]
 
     """
@@ -237,7 +233,6 @@ def startTop500Parsing():
     resultValues = []
     for listComponent in results:
         resultValues.extend([listComponent])
-    #print(resultValues)
     return resultValues
 
 
@@ -245,16 +240,12 @@ def fetchInput(queue_manager):
     """
     Downloads top-1m.csv, parses top500 country lists, merges them and sends them to queue_manager.
     """
-
-    """
-    Can be used, if merging of the lists works
-
-    #top500ListOfLists = startTop500Parsing()
-    #top500List = joinListOfLists(top500ListOfLists)
-    #top1MioList = datedAlexaCSV(alexa_splits)
-    #queue_manager.put_new_list(joinLists(top1MioList,top500List))
-    """
-    queue_manager.put_new_list(datedAlexaCSV(alexa_splits))
+    top500ListOfLists = startTop500Parsing()
+    print("joining top 500 lists")
+    top500List = joinListOfLists(top500ListOfLists)
+    top1MioList = datedAlexaCSV(alexa_splits)
+    print("joining 'joined' top 500 list with alexa top1mio")
+    queue_manager.put_new_list(joinLists(top1MioList,top500List))
     print("Finished building and sending list.")
 
 
@@ -266,7 +257,7 @@ if __name__ == "__main__":
     fetchInput(queue_manager)
     while(True):
         t = datetime.datetime.today()#converting datetime.datetime.today object into datetime.date object
-        today = datetime.date(t.year,t.month,t.day)#converting datetime.datetime.today object into datetime.date object
+        today = datetime.date(t.year,t.month,t.day)
         if today > nextDownloadDate:
             fetchInput(queue_manager)
         os.remove(csvPath)
