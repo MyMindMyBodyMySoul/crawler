@@ -1,0 +1,380 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>server.queue_manager module &mdash; hotcat 0.1 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="hotcat 0.1 documentation" href="index.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> hotcat
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="OVERVIEW.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="INSTALLATION.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="USAGE.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="settings.html">Settings</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="index.html">hotcat</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+      
+    <li>server.queue_manager module</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-server.queue_manager">
+<span id="server-queue-manager-module"></span><h1>server.queue_manager module<a class="headerlink" href="#module-server.queue_manager" title="Permalink to this headline">¶</a></h1>
+<p>This module contains following classes:
+<code class="xref py py-class docutils literal"><span class="pre">QueueManager</span></code>,
+<code class="xref py py-class docutils literal"><span class="pre">QueueClient</span></code>,
+<code class="xref py py-class docutils literal"><span class="pre">QueueServer</span></code>.</p>
+<p>You can run this module directly to start the server.
+The server bind to address and port, which are specified in <a class="reference internal" href="settings.html#module-settings" title="settings"><code class="xref py py-mod docutils literal"><span class="pre">settings</span></code></a>.</p>
+<blockquote>
+<div><div class="highlight-python"><div class="highlight"><pre>$ python queue_manager.py
+</pre></div>
+</div>
+</div></blockquote>
+<dl class="class">
+<dt id="server.queue_manager.QueueManager">
+<em class="property">class </em><code class="descname">QueueManager</code><a class="reference internal" href="_modules/server/queue_manager.html#QueueManager"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#server.queue_manager.QueueManager" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/library/functions.html#object" title="(in Python v2.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<p>This class holds and manage all queues.</p>
+<blockquote>
+<div><div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Do not use this class directly.
+Instead use <code class="xref py py-class docutils literal"><span class="pre">QueueClient</span></code> to connect to the <code class="xref py py-class docutils literal"><span class="pre">QueueServer</span></code>
+and get an instance of this class.</p>
+</div>
+</div></blockquote>
+<dl class="method">
+<dt id="server.queue_manager.QueueManager.next_host">
+<code class="descname">next_host</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/server/queue_manager.html#QueueManager.next_host"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#server.queue_manager.QueueManager.next_host" title="Permalink to this definition">¶</a></dt>
+<dd><p>Getting next hostname from the appropriate queue.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Return str:</th><td class="field-body">hostname e.g. &#8220;google.com&#8221;</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="server.queue_manager.QueueManager.empty_queue">
+<code class="descname">empty_queue</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/server/queue_manager.html#QueueManager.empty_queue"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#server.queue_manager.QueueManager.empty_queue" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>Empty entire queue.</dt>
+<dd><div class="first last admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last"><em>use this function with care</em>. it will empty the whole host_queue.
+even if the host_queue has not finished yet.</p>
+</div>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="server.queue_manager.QueueManager.put_user">
+<code class="descname">put_user</code><span class="sig-paren">(</span><em>user_request</em>, <em>user_id</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/server/queue_manager.html#QueueManager.put_user"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#server.queue_manager.QueueManager.put_user" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function will store any user requested urls to _user_queue
+and ready the _user_result_dict for an incoming sslyze result
+corresponding to user_id</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>user_request</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#list" title="(in Python v2.7)"><em>list</em></a>) &#8211; the url requested to be checked by sslyze</li>
+<li><strong>user_id</strong> &#8211; unique user identifier corresponding to the request</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="server.queue_manager.QueueManager.put_new_list">
+<code class="descname">put_new_list</code><span class="sig-paren">(</span><em>new_list</em>, <em>from_dump=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/server/queue_manager.html#QueueManager.put_new_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#server.queue_manager.QueueManager.put_new_list" title="Permalink to this definition">¶</a></dt>
+<dd><p>Empty and refill the queue.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>new_list</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#list" title="(in Python v2.7)"><em>list</em></a>) &#8211; nested list with hostname and source e.g. [ [&#8220;google.com&#8221;, [&#8220;alexa-top-1m&#8221;, ] ], ]</li>
+<li><strong>from_dump</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#bool" title="(in Python v2.7)"><em>bool</em></a>) &#8211; should be set to True if function call is used to fill the queue from dump</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="server.queue_manager.QueueManager.next_result">
+<code class="descname">next_result</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/server/queue_manager.html#QueueManager.next_result"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#server.queue_manager.QueueManager.next_result" title="Permalink to this definition">¶</a></dt>
+<dd><p>Getting next result from result_queue.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Return tuple:</th><td class="field-body">({sslyze result}, [source,])</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="server.queue_manager.QueueManager.get_user_result">
+<code class="descname">get_user_result</code><span class="sig-paren">(</span><em>user_id</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/server/queue_manager.html#QueueManager.get_user_result"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#server.queue_manager.QueueManager.get_user_result" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function will get and return the result
+corresponding to the supplied user_id</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>user_id</strong> &#8211; the user_id to identify which result to get</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the sslyze result</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">_inner_result_queue is a local field and will not be available beyond
+this function
+There will be only one sslyze result per user_id</p>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="server.queue_manager.QueueManager.put_result">
+<code class="descname">put_result</code><span class="sig-paren">(</span><em>result</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/server/queue_manager.html#QueueManager.put_result"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#server.queue_manager.QueueManager.put_result" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adding a result to result_queue.
+:param result: the sslyze result to pe added to the _result.queue</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="server.queue_manager.QueueManager.put_user_result">
+<code class="descname">put_user_result</code><span class="sig-paren">(</span><em>result</em>, <em>user_id</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/server/queue_manager.html#QueueManager.put_user_result"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#server.queue_manager.QueueManager.put_user_result" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function will will add an sslyze result to the _user_result_dict
+:param result: the sslyze result to be added
+:param user_id: the user identifier for the corresponding result
+.. note::   _inner_result_queue is a local field and will not be available beyond</p>
+<blockquote>
+<div>this function
+There will be only one sslyze result per user_id</div></blockquote>
+</dd></dl>
+
+<dl class="method">
+<dt id="server.queue_manager.QueueManager.status">
+<code class="descname">status</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/server/queue_manager.html#QueueManager.status"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#server.queue_manager.QueueManager.status" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="server.queue_manager.QueueClient">
+<em class="property">class </em><code class="descname">QueueClient</code><span class="sig-paren">(</span><em>address=('localhost'</em>, <em>50001)</em>, <em>authkey='abc'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/server/queue_manager.html#QueueClient"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#server.queue_manager.QueueClient" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/library/multiprocessing.html#multiprocessing.managers.BaseManager" title="(in Python v2.7)"><code class="xref py py-class docutils literal"><span class="pre">multiprocessing.managers.BaseManager</span></code></a></p>
+<p>This class is used to connect to QueueServer.</p>
+<p>If you instantiate this class it will auto connect to the server.
+So you can get an instance by name of each registered object.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Example:</th><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">queue_manager</span> <span class="kn">import</span> <span class="n">QueueClient</span>
+
+<span class="n">c</span> <span class="o">=</span> <span class="n">QueueClient</span><span class="p">()</span>
+
+<span class="c"># registered name is &quot;queue_manager&quot; , so you can call it to get</span>
+<span class="c"># the instance of QueueManager class.</span>
+<span class="n">queue_manager</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">queue_manager</span><span class="p">()</span>
+
+<span class="c"># do something with queue_manager ...</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="class">
+<dt id="server.queue_manager.QueueServer">
+<em class="property">class </em><code class="descname">QueueServer</code><a class="reference internal" href="_modules/server/queue_manager.html#QueueServer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#server.queue_manager.QueueServer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/library/multiprocessing.html#multiprocessing.managers.BaseManager" title="(in Python v2.7)"><code class="xref py py-class docutils literal"><span class="pre">multiprocessing.managers.BaseManager</span></code></a></p>
+<p>The QueueServer ...</p>
+</dd></dl>
+
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2015, dhoeyng.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'0.1',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

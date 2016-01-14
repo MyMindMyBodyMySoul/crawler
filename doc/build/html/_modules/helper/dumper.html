@@ -1,0 +1,262 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>helper.dumper &mdash; hotcat 0.1 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="hotcat 0.1 documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> hotcat
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../OVERVIEW.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../INSTALLATION.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../USAGE.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../settings.html">Settings</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../../index.html">hotcat</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+      
+    <li>helper.dumper</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for helper.dumper</h1><div class="highlight"><pre>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">cPickle</span>
+<span class="kn">from</span> <span class="nn">thread</span> <span class="kn">import</span> <span class="n">start_new_thread</span>
+
+<div class="viewcode-block" id="Dumper"><a class="viewcode-back" href="../../helper.dumper.html#helper.dumper.Dumper">[docs]</a><span class="k">class</span> <span class="nc">Dumper</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="n">DUMP_LOCATION</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">__file__</span><span class="p">),</span> <span class="s">&#39;..&#39;</span><span class="p">,</span> <span class="s">&#39;data&#39;</span><span class="p">)</span>
+
+    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="Dumper.dump_counter"><a class="viewcode-back" href="../../helper.dumper.html#helper.dumper.Dumper.dump_counter">[docs]</a>    <span class="k">def</span> <span class="nf">dump_counter</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">counter</span><span class="p">):</span>
+        <span class="k">print</span><span class="p">(</span><span class="s">&#39;dumping counter&#39;</span><span class="p">)</span>
+        <span class="n">start_new_thread</span><span class="p">(</span><span class="n">cls</span><span class="o">.</span><span class="n">_dump</span><span class="p">,</span> <span class="p">(</span><span class="s">&#39;counter.dmp&#39;</span><span class="p">,</span> <span class="n">counter</span><span class="p">))</span></div>
+
+    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="Dumper.dump_queue"><a class="viewcode-back" href="../../helper.dumper.html#helper.dumper.Dumper.dump_queue">[docs]</a>    <span class="k">def</span> <span class="nf">dump_queue</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">queue</span><span class="p">):</span>
+        <span class="k">print</span><span class="p">(</span><span class="s">&#39;dumping queue&#39;</span><span class="p">)</span>
+        <span class="n">start_new_thread</span><span class="p">(</span><span class="n">cls</span><span class="o">.</span><span class="n">_dump</span><span class="p">,</span> <span class="p">(</span><span class="s">&#39;queue.dmp&#39;</span><span class="p">,</span> <span class="n">queue</span><span class="p">))</span></div>
+
+    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="Dumper.load"><a class="viewcode-back" href="../../helper.dumper.html#helper.dumper.Dumper.load">[docs]</a>    <span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">cb</span><span class="p">):</span>
+        <span class="n">start_new_thread</span><span class="p">(</span><span class="n">cls</span><span class="o">.</span><span class="n">_load_threaded</span><span class="p">,</span> <span class="p">(</span><span class="n">cb</span><span class="p">,))</span></div>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">_load_threaded</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">cb</span><span class="p">):</span>
+        <span class="n">counter</span> <span class="o">=</span> <span class="n">cls</span><span class="o">.</span><span class="n">_load</span><span class="p">(</span><span class="s">&#39;counter.dmp&#39;</span><span class="p">)</span>
+        <span class="n">queue</span> <span class="o">=</span> <span class="n">cls</span><span class="o">.</span><span class="n">_load</span><span class="p">(</span><span class="s">&#39;queue.dmp&#39;</span><span class="p">)</span>
+        <span class="n">cb</span><span class="p">(</span><span class="n">counter</span><span class="p">,</span> <span class="n">queue</span><span class="p">)</span>
+
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">_dump</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">cls</span><span class="o">.</span><span class="n">DUMP_LOCATION</span><span class="p">):</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">cls</span><span class="o">.</span><span class="n">DUMP_LOCATION</span><span class="p">)</span>
+            <span class="n">dump_file</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">cls</span><span class="o">.</span><span class="n">DUMP_LOCATION</span><span class="p">,</span> <span class="n">filename</span><span class="p">),</span> <span class="s">&#39;wb+&#39;</span><span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">cPickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">dump_file</span><span class="p">,</span> <span class="n">cPickle</span><span class="o">.</span><span class="n">HIGHEST_PROTOCOL</span><span class="p">)</span>
+                <span class="k">print</span><span class="p">(</span><span class="s">&#39;dumping finished&#39;</span><span class="p">)</span>
+            <span class="k">except</span> <span class="p">(</span><span class="n">cPickle</span><span class="o">.</span><span class="n">PickleError</span><span class="p">,</span><span class="n">cPickle</span><span class="o">.</span><span class="n">PicklingError</span><span class="p">)</span> <span class="k">as</span> <span class="n">pe</span><span class="p">:</span>
+                <span class="k">print</span> <span class="n">pe</span>
+            <span class="k">finally</span><span class="p">:</span>
+                <span class="n">dump_file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">OSError</span> <span class="k">as</span> <span class="n">oe</span><span class="p">:</span>
+                    <span class="k">print</span> <span class="n">oe</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">ex</span><span class="p">:</span>
+            <span class="c"># Catch everything unexpected</span>
+            <span class="k">print</span><span class="p">(</span><span class="s">&quot;Unexpected error while creating dumpfile: &quot;</span><span class="p">,</span><span class="n">ex</span><span class="p">)</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">_load</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">cls</span><span class="o">.</span><span class="n">DUMP_LOCATION</span><span class="p">,</span> <span class="n">filename</span><span class="p">)):</span>
+            <span class="k">print</span><span class="p">(</span><span class="s">&quot;Found dump </span><span class="si">%s</span><span class="s"> &quot;</span> <span class="o">%</span> <span class="n">filename</span><span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">dump_file</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">cls</span><span class="o">.</span><span class="n">DUMP_LOCATION</span><span class="p">,</span> <span class="n">filename</span><span class="p">),</span> <span class="s">&#39;rb+&#39;</span><span class="p">)</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">data</span> <span class="o">=</span> <span class="n">cPickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">dump_file</span><span class="p">)</span>
+                    <span class="n">dump_file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+                    <span class="k">return</span> <span class="n">data</span>
+                <span class="k">except</span> <span class="p">(</span><span class="n">cPickle</span><span class="o">.</span><span class="n">UnpicklingError</span><span class="p">,</span> <span class="n">cPickle</span><span class="o">.</span><span class="n">UnpickleableError</span><span class="p">)</span> <span class="k">as</span> <span class="n">pe</span><span class="p">:</span>
+                    <span class="k">print</span> <span class="n">pe</span>
+                <span class="k">finally</span><span class="p">:</span>
+                    <span class="n">dump_file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+            <span class="k">except</span> <span class="ne">OSError</span> <span class="k">as</span> <span class="n">oe</span><span class="p">:</span>
+                <span class="k">print</span> <span class="n">oe</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">ex</span><span class="p">:</span>
+                <span class="c"># Catch everything unexpected</span>
+                <span class="k">print</span><span class="p">(</span><span class="s">&quot;Unexpected error while reading dump file: &quot;</span><span class="p">,</span> <span class="n">ex</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">print</span><span class="p">(</span><span class="s">&quot;No dump </span><span class="si">%s</span><span class="s"> found. Continuing with regular operation&quot;</span> <span class="o">%</span> <span class="n">filename</span><span class="p">)</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2015, dhoeyng.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'0.1',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

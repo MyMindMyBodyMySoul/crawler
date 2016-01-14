@@ -1,0 +1,233 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>helper.status &mdash; hotcat 0.1 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="hotcat 0.1 documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> hotcat
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../OVERVIEW.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../INSTALLATION.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../USAGE.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../settings.html">Settings</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../../index.html">hotcat</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+      
+    <li>helper.status</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for helper.status</h1><div class="highlight"><pre>
+
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">time</span>
+
+
+<div class="viewcode-block" id="main"><a class="viewcode-back" href="../../helper.status.html#helper.status.main">[docs]</a><span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+    <span class="kn">from</span> <span class="nn">server.queue_manager</span> <span class="kn">import</span> <span class="n">QueueClient</span>
+
+    <span class="n">c</span> <span class="o">=</span> <span class="n">QueueClient</span><span class="p">()</span>
+    <span class="n">qm</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">queue_manager</span><span class="p">()</span>
+
+    <span class="k">while</span> <span class="bp">True</span><span class="p">:</span>
+        <span class="n">status</span> <span class="o">=</span> <span class="n">qm</span><span class="o">.</span><span class="n">status</span><span class="p">()</span>
+
+        <span class="k">print</span><span class="p">(</span><span class="s">&#39;#&#39;</span><span class="o">*</span><span class="mi">15</span> <span class="o">+</span> <span class="s">&#39; Scan Status &#39;</span> <span class="o">+</span> <span class="s">&#39;#&#39;</span><span class="o">*</span><span class="mi">15</span><span class="p">)</span>
+
+        <span class="k">print</span><span class="p">(</span><span class="s">&#39;{0:&lt;32}{1:.2f} m&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s">&#39;scan time:&#39;</span><span class="p">,</span> <span class="n">status</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;scantime&#39;</span><span class="p">)</span><span class="o">/</span><span class="mi">60</span><span class="p">))</span>
+        <span class="k">print</span><span class="p">(</span><span class="s">&#39;{0:&lt;32}{1:.2f} s&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s">&#39;average scan time:&#39;</span><span class="p">,</span> <span class="n">status</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;avgtime&#39;</span><span class="p">)))</span>
+
+        <span class="k">print</span><span class="p">(</span><span class="s">&#39;{0:&lt;32}{1}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s">&#39;scans completed:&#39;</span><span class="p">,</span> <span class="n">status</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;completed&#39;</span><span class="p">)))</span>
+        <span class="k">print</span><span class="p">(</span><span class="s">&#39;{0:&lt;32}{1}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s">&#39;fully scanned:&#39;</span><span class="p">,</span> <span class="n">status</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;fully_scanned&#39;</span><span class="p">)))</span>
+
+        <span class="k">print</span><span class="p">(</span><span class="s">&#39;{0:&lt;32}{1}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s">&#39;host queue position:&#39;</span><span class="p">,</span> <span class="n">status</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;counter&#39;</span><span class="p">)))</span>
+        <span class="k">print</span><span class="p">(</span><span class="s">&#39;{0:&lt;32}{1}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s">&#39;host queue is filling:&#39;</span><span class="p">,</span> <span class="n">status</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;is_filling&#39;</span><span class="p">)))</span>
+
+        <span class="k">print</span><span class="p">(</span><span class="s">&#39;{0:&lt;32}{1}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s">&#39;host queue size:&#39;</span><span class="p">,</span> <span class="n">status</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;host_queue_size&#39;</span><span class="p">)))</span>
+        <span class="k">print</span><span class="p">(</span><span class="s">&#39;{0:&lt;32}{1}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s">&#39;user queue size:&#39;</span><span class="p">,</span> <span class="n">status</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;user_queue_size&#39;</span><span class="p">)))</span>
+        <span class="k">print</span><span class="p">(</span><span class="s">&#39;{0:&lt;32}{1}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s">&#39;result queue size:&#39;</span><span class="p">,</span> <span class="n">status</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;result_queue_size&#39;</span><span class="p">)))</span>
+
+        <span class="c"># print(&#39;{0:&lt;32}{1}&#39;.format(&#39;dump threshold:&#39;, status.get(&#39;dump_limit&#39;)))</span>
+        <span class="c"># print(&#39;{0:&lt;32}{1}&#39;.format(&#39;result queue threshold:&#39;, status.get(&#39;result_queue_limit&#39;)))</span>
+
+        <span class="k">print</span><span class="p">(</span><span class="s">&#39;#&#39;</span><span class="o">*</span><span class="mi">43</span><span class="p">)</span>
+
+        <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span></div>
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">())</span>
+    <span class="n">main</span><span class="p">()</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2015, dhoeyng.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'0.1',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

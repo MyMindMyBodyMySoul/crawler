@@ -1,0 +1,412 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>worker.result_worker &mdash; hotcat 0.1 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="hotcat 0.1 documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> hotcat
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../OVERVIEW.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../INSTALLATION.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../USAGE.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../settings.html">Settings</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../../index.html">hotcat</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+      
+    <li>worker.result_worker</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for worker.result_worker</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">This module fetches results out of the queue_manager and formats it in JSON to add it to da database</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+
+<span class="kn">from</span> <span class="nn">server.queue_manager</span> <span class="kn">import</span> <span class="n">QueueClient</span>
+<span class="kn">from</span> <span class="nn">pymongo</span> <span class="kn">import</span> <span class="n">MongoClient</span><span class="p">,</span> <span class="n">errors</span>
+<span class="kn">from</span> <span class="nn">time</span> <span class="kn">import</span> <span class="n">sleep</span>
+<span class="kn">import</span> <span class="nn">datetime</span>
+<span class="kn">from</span> <span class="nn">tld</span> <span class="kn">import</span> <span class="n">get_tld</span>
+<span class="kn">from</span> <span class="nn">helper.cipher_desc</span> <span class="kn">import</span> <span class="n">CIPHER_DESC</span>
+<span class="kn">import</span> <span class="nn">socket</span>
+
+
+<div class="viewcode-block" id="Database"><a class="viewcode-back" href="../../worker.result_worker.html#worker.result_worker.Database">[docs]</a><span class="k">class</span> <span class="nc">Database</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This is the database wrapper class.</span>
+<span class="sd">    An instance of it holds the connection to the Database and contains methods</span>
+<span class="sd">    for operations on the Database.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">db_client</span> <span class="o">=</span> <span class="n">MongoClient</span><span class="p">(</span><span class="s">&#39;localhost&#39;</span><span class="p">,</span> <span class="mi">27017</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">db</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">db_client</span><span class="o">.</span><span class="n">tls_crawler</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">coll</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">tls_scan_results</span>
+
+<div class="viewcode-block" id="Database.insert_result"><a class="viewcode-back" href="../../worker.result_worker.html#worker.result_worker.Database.insert_result">[docs]</a>    <span class="k">def</span> <span class="nf">insert_result</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">scan</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Putting result to The Database.</span>
+
+<span class="sd">        :param scan: the result of the current scan.</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c"># retry the insert, if the connection to the database is lost</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">60</span><span class="p">):</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">coll</span><span class="o">.</span><span class="n">insert_one</span><span class="p">(</span><span class="n">scan</span><span class="p">)</span>
+                <span class="k">break</span>
+            <span class="k">except</span> <span class="n">errors</span><span class="o">.</span><span class="n">AutoReconnect</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="k">print</span> <span class="n">e</span>
+                <span class="n">sleep</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&quot;Could not insert!&quot;</span><span class="p">)</span>
+        <span class="k">return</span></div></div>
+
+
+<span class="k">def</span> <span class="nf">_parse_cert</span><span class="p">(</span><span class="n">command_result</span><span class="p">):</span>
+
+    <span class="n">not_before</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="n">command_result</span><span class="p">[</span><span class="s">&#39;validity&#39;</span><span class="p">][</span><span class="s">&#39;notBefore&#39;</span><span class="p">],</span> <span class="s">&#39;%b </span><span class="si">%d</span><span class="s"> %H:%M:%S %Y %Z&#39;</span><span class="p">)</span>
+    <span class="n">not_after</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="n">command_result</span><span class="p">[</span><span class="s">&#39;validity&#39;</span><span class="p">][</span><span class="s">&#39;notAfter&#39;</span><span class="p">],</span> <span class="s">&#39;%b </span><span class="si">%d</span><span class="s"> %H:%M:%S %Y %Z&#39;</span><span class="p">)</span>
+    <span class="n">utc_ts</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">utcnow</span><span class="p">()</span>
+
+    <span class="n">trusted_result</span> <span class="o">=</span> <span class="n">_is_trusted</span><span class="p">(</span><span class="n">command_result</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&quot;trusted&quot;</span><span class="p">))</span>
+
+    <span class="n">cert_dict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+        <span class="n">issuer</span><span class="o">=</span><span class="n">command_result</span><span class="p">[</span><span class="s">&#39;issuer&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;commonName&#39;</span><span class="p">),</span>
+        <span class="n">subject</span><span class="o">=</span><span class="n">command_result</span><span class="p">[</span><span class="s">&#39;subject&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;commonName&#39;</span><span class="p">),</span>
+        <span class="n">publicKeyLengh</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">command_result</span><span class="p">[</span><span class="s">&#39;subjectPublicKeyInfo&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;publicKeySize&#39;</span><span class="p">)),</span>
+        <span class="n">publicKeyAlgorithm</span><span class="o">=</span><span class="n">command_result</span><span class="p">[</span><span class="s">&#39;subjectPublicKeyInfo&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;publicKeyAlgorithm&#39;</span><span class="p">),</span>
+        <span class="n">signatureAlgorithm</span><span class="o">=</span><span class="n">command_result</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;signatureAlgorithm&#39;</span><span class="p">),</span>
+        <span class="n">notValidBefore</span><span class="o">=</span><span class="n">not_before</span><span class="p">,</span>
+        <span class="n">notValidAfter</span><span class="o">=</span><span class="n">not_after</span><span class="p">,</span>
+        <span class="n">selfSigned</span><span class="o">=</span><span class="n">trusted_result</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;selfSigned&#39;</span><span class="p">),</span>
+        <span class="n">trusted</span><span class="o">=</span><span class="n">trusted_result</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;trusted&#39;</span><span class="p">),</span>
+        <span class="n">expired</span><span class="o">=</span><span class="bp">False</span>
+    <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">not_after</span> <span class="o">&lt;</span> <span class="n">utc_ts</span> <span class="ow">and</span> <span class="n">utc_ts</span> <span class="o">&gt;</span> <span class="n">not_before</span><span class="p">:</span>
+        <span class="n">cert_dict</span><span class="p">[</span><span class="s">&#39;expired&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">True</span>
+    <span class="k">return</span> <span class="n">cert_dict</span>
+
+
+<span class="k">def</span> <span class="nf">_is_trusted</span><span class="p">(</span><span class="n">signed_result</span><span class="p">):</span>
+    <span class="n">trusted_result</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+        <span class="n">selfSigned</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+        <span class="n">trusted</span><span class="o">=</span><span class="bp">False</span>
+    <span class="p">)</span>
+    <span class="k">if</span> <span class="n">signed_result</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;Google&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="s">&#39;ok&#39;</span><span class="p">:</span>
+        <span class="n">trusted_result</span><span class="p">[</span><span class="s">&#39;selfSigned&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="n">trusted_result</span><span class="p">[</span><span class="s">&#39;trusted&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">True</span>
+    <span class="k">return</span> <span class="n">trusted_result</span>
+
+
+<span class="k">def</span> <span class="nf">_parse_ciphers</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">protocol</span><span class="p">,</span> <span class="n">public_key_size</span><span class="p">):</span>
+
+    <span class="n">ciphers_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">key_status_list</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="p">(</span><span class="s">&#39;preferredCipherSuite&#39;</span><span class="p">,</span> <span class="s">&#39;preferred&#39;</span><span class="p">),</span>
+        <span class="p">(</span><span class="s">&#39;acceptedCipherSuites&#39;</span><span class="p">,</span> <span class="s">&#39;accepted&#39;</span><span class="p">),</span>
+        <span class="p">(</span><span class="s">&#39;errors&#39;</span><span class="p">,</span> <span class="s">&#39;error&#39;</span><span class="p">),</span>
+        <span class="p">(</span><span class="s">&#39;rejectedCipherSuites&#39;</span><span class="p">,</span> <span class="s">&#39;rejected&#39;</span><span class="p">)</span>
+    <span class="p">]</span>
+    <span class="n">protocol_dict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+        <span class="n">tlsv1</span><span class="o">=</span><span class="s">&#39;TLSv1.0&#39;</span><span class="p">,</span>
+        <span class="n">tlsv1_1</span><span class="o">=</span><span class="s">&#39;TLSv1.1&#39;</span><span class="p">,</span>
+        <span class="n">tlsv1_2</span><span class="o">=</span><span class="s">&#39;TLSv1.2&#39;</span><span class="p">,</span>
+        <span class="n">sslv2</span><span class="o">=</span><span class="s">&#39;SSLv2&#39;</span><span class="p">,</span>
+        <span class="n">sslv3</span><span class="o">=</span><span class="s">&#39;SSLv3&#39;</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">preferred_cipher</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="k">for</span> <span class="p">(</span><span class="n">result_key</span><span class="p">,</span> <span class="n">result_status</span><span class="p">)</span> <span class="ow">in</span> <span class="n">key_status_list</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">result_status</span> <span class="o">==</span> <span class="s">&#39;rejected&#39;</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="n">result_list</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="n">result_key</span><span class="p">]</span>
+
+        <span class="k">for</span> <span class="n">ssl_cipher</span> <span class="ow">in</span> <span class="n">result_list</span><span class="p">:</span>
+
+            <span class="c"># exclude the preferred cipher suite from the accepted ones</span>
+            <span class="k">if</span> <span class="n">result_status</span> <span class="o">==</span> <span class="s">&#39;preferred&#39;</span><span class="p">:</span>
+                <span class="n">preferred_cipher</span> <span class="o">=</span> <span class="n">ssl_cipher</span>
+            <span class="k">if</span> <span class="n">result_status</span> <span class="o">==</span> <span class="s">&#39;accepted&#39;</span> <span class="ow">and</span> <span class="n">preferred_cipher</span> <span class="o">==</span> <span class="n">ssl_cipher</span><span class="p">:</span>
+                <span class="n">preferred_cipher</span> <span class="o">=</span> <span class="bp">None</span>
+                <span class="k">continue</span>
+
+            <span class="n">msg</span> <span class="o">=</span> <span class="n">result_list</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">ssl_cipher</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>  <span class="c"># msg not used until now</span>
+            <span class="n">bits</span> <span class="o">=</span> <span class="n">result_list</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">ssl_cipher</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">dh_info</span> <span class="o">=</span> <span class="n">result_list</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">ssl_cipher</span><span class="p">)[</span><span class="mi">2</span><span class="p">]</span>
+            <span class="n">cipher_desc</span> <span class="o">=</span> <span class="n">CIPHER_DESC</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">ssl_cipher</span><span class="p">)</span>
+            <span class="c">#  check for the ephemeral flag</span>
+            <span class="n">ephemeral_flag</span> <span class="o">=</span> <span class="bp">False</span>
+            <span class="k">if</span> <span class="n">ssl_cipher</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&#39;ECDHE&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">ssl_cipher</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&#39;DHE&#39;</span><span class="p">):</span>
+                <span class="n">ephemeral_flag</span> <span class="o">=</span> <span class="bp">True</span>
+
+            <span class="n">cipher_dict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+                <span class="n">cipher</span><span class="o">=</span><span class="n">ssl_cipher</span><span class="p">,</span>
+                <span class="n">protocol</span><span class="o">=</span><span class="n">protocol_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">protocol</span><span class="p">),</span>
+                <span class="n">status</span><span class="o">=</span><span class="n">result_status</span><span class="p">,</span>
+                <span class="n">bits</span><span class="o">=</span><span class="n">bits</span><span class="p">,</span>
+                <span class="n">kx</span><span class="o">=</span><span class="n">cipher_desc</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&quot;kx&quot;</span><span class="p">),</span>
+                <span class="n">au</span><span class="o">=</span><span class="n">cipher_desc</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&quot;au&quot;</span><span class="p">),</span>
+                <span class="n">enc</span><span class="o">=</span><span class="n">cipher_desc</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&quot;enc&quot;</span><span class="p">),</span>
+                <span class="n">mac</span><span class="o">=</span><span class="n">cipher_desc</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&quot;mac&quot;</span><span class="p">),</span>
+                <span class="n">export</span><span class="o">=</span><span class="n">cipher_desc</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&quot;export&quot;</span><span class="p">),</span>
+                <span class="n">ephemeral</span><span class="o">=</span><span class="n">ephemeral_flag</span>
+            <span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">dh_info</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">dh_info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&quot;Prime&quot;</span><span class="p">):</span>
+                    <span class="n">cipher_dict</span><span class="p">[</span><span class="s">&quot;curve&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&quot;P-</span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">dh_info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&quot;GroupSize&quot;</span><span class="p">)</span>
+                    <span class="n">cipher_dict</span><span class="p">[</span><span class="s">&quot;kxStrength&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">dh_info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&quot;GroupSize&quot;</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">public_key_size</span><span class="p">:</span>
+                    <span class="n">cipher_dict</span><span class="p">[</span><span class="s">&quot;kxStrength&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">public_key_size</span><span class="p">)</span>
+
+            <span class="n">ciphers_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cipher_dict</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">ciphers_list</span>
+
+
+<div class="viewcode-block" id="main"><a class="viewcode-back" href="../../worker.result_worker.html#worker.result_worker.main">[docs]</a><span class="k">def</span> <span class="nf">main</span><span class="p">():</span></div>
+    <span class="c"># get instance of QueueClient</span>
+    <span class="n">c</span> <span class="o">=</span> <span class="n">QueueClient</span><span class="p">()</span>
+    <span class="c"># get appropriate queue from QueueClient</span>
+    <span class="n">qm</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">queue_manager</span><span class="p">()</span>
+    <span class="c"># get instance of Database</span>
+    <span class="n">mdb</span> <span class="o">=</span> <span class="n">Database</span><span class="p">()</span>
+
+    <span class="n">tls_ver</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;tlsv1_2&#39;</span><span class="p">,</span> <span class="s">&#39;tlsv1_1&#39;</span><span class="p">,</span> <span class="s">&#39;sslv3&#39;</span><span class="p">,</span> <span class="s">&#39;sslv2&#39;</span><span class="p">,</span> <span class="s">&#39;tlsv1&#39;</span><span class="p">]</span>
+
+    <span class="k">while</span> <span class="bp">True</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">qm</span><span class="o">.</span><span class="n">next_result</span><span class="p">()</span>
+
+            <span class="n">scan_error</span> <span class="o">=</span> <span class="bp">False</span>
+            <span class="n">scan_date</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
+            <span class="n">domain</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&quot;target&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">socket</span><span class="o">.</span><span class="n">gethostbyname</span><span class="p">(</span><span class="n">domain</span><span class="p">)</span> <span class="o">==</span> <span class="n">domain</span><span class="p">:</span>
+                <span class="n">tld</span> <span class="o">=</span> <span class="bp">None</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">tld</span> <span class="o">=</span> <span class="n">get_tld</span><span class="p">(</span><span class="s">&#39;https://&#39;</span> <span class="o">+</span> <span class="n">domain</span><span class="p">,</span> <span class="n">as_object</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">fail_silently</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span><span class="o">.</span><span class="n">suffix</span>
+            <span class="n">sources</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&quot;source&quot;</span><span class="p">)</span>
+            <span class="n">ciphers</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">certificate</span> <span class="o">=</span> <span class="p">{}</span>
+
+            <span class="k">if</span> <span class="n">result</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&quot;error&quot;</span><span class="p">):</span>
+                <span class="c"># print(result.get(&quot;err_msg&quot;))</span>
+                <span class="n">scan_error</span> <span class="o">=</span> <span class="bp">True</span>
+
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">result_list</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;result&#39;</span><span class="p">)</span>
+
+                <span class="n">public_key_size</span> <span class="o">=</span> <span class="bp">None</span>
+
+                <span class="c">#  move the result of certinfo to the front of the result_list</span>
+                <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">result</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">result_list</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="n">result</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;command&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="s">&#39;certinfo&#39;</span><span class="p">:</span>
+                        <span class="n">result_list</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">result_list</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
+                        <span class="k">break</span>
+
+                <span class="k">for</span> <span class="n">command_result</span> <span class="ow">in</span> <span class="n">result_list</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">command_result</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&quot;error&quot;</span><span class="p">):</span>
+                        <span class="c"># TODO handle error</span>
+                        <span class="k">continue</span>
+
+                    <span class="k">if</span> <span class="n">command_result</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&quot;command&quot;</span><span class="p">)</span> <span class="ow">in</span> <span class="n">tls_ver</span><span class="p">:</span>
+                        <span class="n">ciphers</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">_parse_ciphers</span><span class="p">(</span><span class="n">command_result</span><span class="p">,</span> <span class="n">command_result</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&quot;command&quot;</span><span class="p">),</span> <span class="n">public_key_size</span><span class="p">))</span>
+                    <span class="k">elif</span> <span class="n">command_result</span><span class="p">[</span><span class="s">&quot;command&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s">&quot;certinfo&quot;</span><span class="p">:</span>
+                        <span class="n">public_key_size</span> <span class="o">=</span> <span class="n">command_result</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;subjectPublicKeyInfo&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;publicKeySize&#39;</span><span class="p">)</span>
+                        <span class="n">certificate</span> <span class="o">=</span> <span class="n">_parse_cert</span><span class="p">(</span><span class="n">command_result</span><span class="p">)</span>
+
+            <span class="n">db_item</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+                    <span class="n">scanError</span><span class="o">=</span><span class="n">scan_error</span><span class="p">,</span>
+                    <span class="n">scanDate</span><span class="o">=</span><span class="n">scan_date</span><span class="p">,</span>
+                    <span class="n">domain</span><span class="o">=</span><span class="n">domain</span><span class="p">,</span>
+                    <span class="n">tld</span><span class="o">=</span><span class="n">tld</span><span class="p">,</span>
+                    <span class="n">sources</span><span class="o">=</span><span class="n">sources</span><span class="p">,</span>
+                    <span class="n">ciphers</span><span class="o">=</span><span class="n">ciphers</span><span class="p">,</span>
+                    <span class="n">certificate</span><span class="o">=</span><span class="n">certificate</span><span class="p">,</span>
+            <span class="p">)</span>
+
+            <span class="n">mdb</span><span class="o">.</span><span class="n">insert_result</span><span class="p">(</span><span class="n">db_item</span><span class="p">)</span>
+
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">main</span><span class="p">()</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2015, dhoeyng.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'0.1',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

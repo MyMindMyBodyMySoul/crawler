@@ -1,0 +1,328 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>worker.sslyze_worker &mdash; hotcat 0.1 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="hotcat 0.1 documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> hotcat
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../OVERVIEW.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../INSTALLATION.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../USAGE.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../settings.html">Settings</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../../index.html">hotcat</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+      
+    <li>worker.sslyze_worker</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for worker.sslyze_worker</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">This worker analyzes hosts similarly to how SSLyze does.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="n">__author__</span> <span class="o">=</span> <span class="p">[</span><span class="s">&quot;David Hoeyng&quot;</span><span class="p">,</span> <span class="s">&quot;Adrian Zapletal&quot;</span><span class="p">]</span>
+<span class="n">__license__</span> <span class="o">=</span> <span class="s">&quot;&quot;</span>  <span class="c"># TODO ?</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s">&quot;0.1&quot;</span>
+
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">signal</span>
+<span class="kn">from</span> <span class="nn">multiprocessing</span> <span class="kn">import</span> <span class="n">Process</span>
+<span class="kn">import</span> <span class="nn">settings</span>
+<span class="kn">from</span> <span class="nn">server.queue_manager</span> <span class="kn">import</span> <span class="n">QueueClient</span>
+<span class="kn">from</span> <span class="nn">sslyze.plugins</span> <span class="kn">import</span> <span class="n">PluginsFinder</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">sslyze.utils.ServersConnectivityTester</span> <span class="kn">import</span> <span class="n">ServersConnectivityTester</span><span class="p">,</span> <span class="n">InvalidTargetError</span>
+<span class="k">except</span> <span class="ne">ImportError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="k">print</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39;</span><span class="se">\n</span><span class="s">ERROR: Could not import nassl Python module. Did you clone SSLyze</span><span class="se">\&#39;</span><span class="s">s repo ? </span><span class="se">\n</span><span class="s">&#39;</span> <span class="o">+</span>\
+    <span class="s">&#39;Please download the right pre-compiled package as described in the README.</span><span class="se">\n</span><span class="s">&#39;</span>
+    <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">()</span>
+
+<span class="c"># Global so we can terminate processes when catching SIGINT</span>
+<span class="n">process_list</span> <span class="o">=</span> <span class="p">[]</span>
+
+
+<div class="viewcode-block" id="WorkerProcess"><a class="viewcode-back" href="../../worker.sslyze_worker.html#worker.sslyze_worker.WorkerProcess">[docs]</a><span class="k">class</span> <span class="nc">WorkerProcess</span><span class="p">(</span><span class="n">Process</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This class checks hosts from the host_queue with the settings specified in settings.py.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">qm</span><span class="p">,</span> <span class="n">available_commands</span><span class="p">):</span>
+        <span class="n">Process</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_qm</span> <span class="o">=</span> <span class="n">qm</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">available_commands</span> <span class="o">=</span> <span class="n">available_commands</span>
+
+<div class="viewcode-block" id="WorkerProcess.run"><a class="viewcode-back" href="../../worker.sslyze_worker.html#worker.sslyze_worker.WorkerProcess.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span></div>
+        <span class="c"># Plugin classes are unpickled by the multiprocessing module</span>
+        <span class="c"># without state info. Need to assign shared_settings here</span>
+
+        <span class="k">for</span> <span class="n">plugin_class</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">available_commands</span><span class="o">.</span><span class="n">itervalues</span><span class="p">():</span>
+            <span class="n">plugin_class</span><span class="o">.</span><span class="n">_shared_settings</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">SHARED_SETTINGS</span>
+
+        <span class="n">hostname</span><span class="p">,</span> <span class="n">user_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_qm</span><span class="o">.</span><span class="n">next_host</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">hostname</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="n">target</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_test_server</span><span class="p">(</span><span class="n">hostname</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">target</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+            <span class="n">result_dict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="n">target</span><span class="p">,</span> <span class="n">result</span><span class="o">=</span><span class="p">[],</span> <span class="n">error</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+
+            <span class="k">for</span> <span class="n">command</span> <span class="ow">in</span> <span class="n">settings</span><span class="o">.</span><span class="n">COMMAND_LIST</span><span class="p">:</span>
+                <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_process_command</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">command</span><span class="p">)</span>
+                <span class="n">result_dict</span><span class="p">[</span><span class="s">&quot;result&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_check_result</span><span class="p">(</span><span class="n">command</span><span class="p">,</span> <span class="n">result</span><span class="p">))</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">result_dict</span> <span class="o">=</span> <span class="n">target</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">user_id</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_qm</span><span class="o">.</span><span class="n">put_user_result</span><span class="p">(</span><span class="n">result_dict</span><span class="p">,</span> <span class="n">user_id</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_qm</span><span class="o">.</span><span class="n">put_result</span><span class="p">(</span><span class="n">result_dict</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_check_result</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">command</span><span class="p">,</span> <span class="n">result</span><span class="p">):</span>
+        <span class="kn">from</span> <span class="nn">plugins.PluginBase</span> <span class="kn">import</span> <span class="n">PluginResult</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">PluginResult</span><span class="p">):</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">get_raw_result</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">result</span><span class="p">:</span>
+                <span class="n">result</span><span class="p">[</span><span class="s">&quot;command&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">command</span>
+                <span class="n">result</span><span class="p">[</span><span class="s">&quot;error&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">False</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">result</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">command</span><span class="o">=</span><span class="n">command</span><span class="p">,</span> <span class="n">error</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">err_msg</span><span class="o">=</span><span class="s">&quot;command is not supported&quot;</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">command</span><span class="o">=</span><span class="n">command</span><span class="p">,</span> <span class="n">error</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">err_msg</span><span class="o">=</span><span class="n">result</span><span class="p">)</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">command</span><span class="o">=</span><span class="n">command</span><span class="p">,</span> <span class="n">error</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">err_msg</span><span class="o">=</span><span class="s">&quot;command is not supported&quot;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">result</span>
+
+    <span class="k">def</span> <span class="nf">_process_command</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">command</span><span class="p">):</span>
+            <span class="n">plugin_instance</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">available_commands</span><span class="p">[</span><span class="n">command</span><span class="p">]()</span>
+            <span class="k">try</span><span class="p">:</span>  <span class="c"># Process the task</span>
+                <span class="n">result</span> <span class="o">=</span> <span class="n">plugin_instance</span><span class="o">.</span><span class="n">process_task</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">command</span><span class="p">,</span> <span class="s">&quot;basic&quot;</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>  <span class="c"># Generate txt and xml results</span>
+                <span class="n">result</span> <span class="o">=</span> <span class="n">err</span>  <span class="c"># TODO format exception</span>
+            <span class="k">return</span> <span class="n">result</span>
+
+    <span class="k">def</span> <span class="nf">_test_server</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hostname</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">target</span> <span class="o">=</span> <span class="n">ServersConnectivityTester</span><span class="o">.</span><span class="n">_test_server</span><span class="p">(</span><span class="n">hostname</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">SHARED_SETTINGS</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">InvalidTargetError</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+            <span class="n">result_dict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="p">(</span><span class="n">hostname</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span> <span class="n">result</span><span class="o">=</span><span class="n">err</span><span class="o">.</span><span class="n">get_error</span><span class="p">(),</span> <span class="n">error</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">None</span><span class="p">,</span> <span class="n">result_dict</span>
+        <span class="k">return</span> <span class="n">target</span></div>
+
+
+<span class="k">def</span> <span class="nf">_sigint_handler</span><span class="p">(</span><span class="n">signum</span><span class="p">,</span> <span class="n">frame</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">process_list</span><span class="p">:</span>
+        <span class="n">p</span><span class="o">.</span><span class="n">terminate</span><span class="p">()</span>
+    <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">()</span>
+
+
+<div class="viewcode-block" id="main"><a class="viewcode-back" href="../../worker.sslyze_worker.html#worker.sslyze_worker.main">[docs]</a><span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Starts as many sslyze worker processes as specified in :mod:`settings`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">signal</span><span class="o">.</span><span class="n">signal</span><span class="p">(</span><span class="n">signal</span><span class="o">.</span><span class="n">SIGINT</span><span class="p">,</span> <span class="n">_sigint_handler</span><span class="p">)</span>
+
+    <span class="c"># PLUGINS INITIALIZATION</span>
+    <span class="n">sslyze_plugins</span> <span class="o">=</span> <span class="n">PluginsFinder</span><span class="p">()</span>
+    <span class="n">available_commands</span> <span class="o">=</span> <span class="n">sslyze_plugins</span><span class="o">.</span><span class="n">get_commands</span><span class="p">()</span>
+
+    <span class="c"># QUEUE INITIALIZATION</span>
+    <span class="n">c</span> <span class="o">=</span> <span class="n">QueueClient</span><span class="p">()</span>
+    <span class="n">qm</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">queue_manager</span><span class="p">()</span>
+
+    <span class="c"># PROCESS INITIALIZATION</span>
+    <span class="k">while</span> <span class="bp">True</span><span class="p">:</span>
+
+        <span class="n">p</span> <span class="o">=</span> <span class="n">WorkerProcess</span><span class="p">(</span><span class="n">qm</span><span class="p">,</span> <span class="n">available_commands</span><span class="p">)</span>
+        <span class="n">p</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+        <span class="n">process_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+
+        <span class="c"># Wait for processes to terminate</span>
+        <span class="n">p</span><span class="o">.</span><span class="n">join</span><span class="p">()</span></div>
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">main</span><span class="p">()</span>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2015, dhoeyng.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'0.1',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

@@ -1,0 +1,503 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>server.queue_manager &mdash; hotcat 0.1 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="hotcat 0.1 documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> hotcat
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../OVERVIEW.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../INSTALLATION.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../USAGE.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../settings.html">Settings</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../../index.html">hotcat</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+      
+    <li>server.queue_manager</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for server.queue_manager</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">This module contains following classes:</span>
+<span class="sd">:class:`~queue_manager.QueueManager`,</span>
+<span class="sd">:class:`~queue_manager.QueueClient`,</span>
+<span class="sd">:class:`~queue_manager.QueueServer`.</span>
+
+<span class="sd">You can run this module directly to start the server.</span>
+<span class="sd">The server bind to address and port, which are specified in :mod:`settings`.</span>
+<span class="sd">    ::</span>
+
+<span class="sd">        $ python queue_manager.py</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">multiprocessing.managers</span> <span class="kn">import</span> <span class="n">BaseManager</span>
+<span class="kn">from</span> <span class="nn">threading</span> <span class="kn">import</span> <span class="n">Condition</span>
+<span class="kn">from</span> <span class="nn">time</span> <span class="kn">import</span> <span class="n">time</span>
+
+<span class="kn">import</span> <span class="nn">settings</span>
+<span class="kn">from</span> <span class="nn">helper.dumper</span> <span class="kn">import</span> <span class="n">Dumper</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">queue</span> <span class="kn">import</span> <span class="n">Queue</span><span class="p">,</span> <span class="n">Empty</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">Queue</span> <span class="kn">import</span> <span class="n">Queue</span><span class="p">,</span> <span class="n">Empty</span>
+
+
+<div class="viewcode-block" id="QueueManager"><a class="viewcode-back" href="../../server.queue_manager.html#server.queue_manager.QueueManager">[docs]</a><span class="k">class</span> <span class="nc">QueueManager</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This class holds and manage all queues.</span>
+
+<span class="sd">        .. note::</span>
+
+<span class="sd">            Do not use this class directly.</span>
+<span class="sd">            Instead use :class:`~queue_manager.QueueClient` to connect to the :class:`~queue_manager.QueueServer`</span>
+<span class="sd">            and get an instance of this class.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="c"># Threshold value describing intervals in which dumps will be created</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_dump_threshold</span> <span class="o">=</span> <span class="mi">10</span>
+
+        <span class="c"># Threshold for result_queue size</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_result_queue_threshold</span> <span class="o">=</span> <span class="mi">500</span>
+
+        <span class="c"># Init queues</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_host_queue</span> <span class="o">=</span> <span class="n">Queue</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_user_queue</span> <span class="o">=</span> <span class="n">Queue</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_result_queue</span> <span class="o">=</span> <span class="n">Queue</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_user_result_dict</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_host_source_dict</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_counter</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_new_list_holder</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_current_list_holder</span> <span class="o">=</span> <span class="bp">None</span>
+
+        <span class="c"># Initial value of -1 is preventing getting trapped in the put_new_list function on startup</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_times_fully_parsed</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+
+        <span class="c"># Definitions for Mutex-locks</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_is_filling</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_filling_condition</span> <span class="o">=</span> <span class="n">Condition</span><span class="p">()</span>
+
+        <span class="c"># used for measurements</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_result_counter</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_start_time</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+
+        <span class="c"># Check if dump file exists</span>
+        <span class="n">Dumper</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_dump_ready</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span>
+
+    <span class="k">def</span> <span class="nf">_dump_ready</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">counter</span><span class="p">,</span> <span class="n">queue</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">counter</span> <span class="ow">and</span> <span class="n">queue</span><span class="p">:</span>
+            <span class="k">print</span><span class="p">(</span><span class="s">&quot;Last iteration stopped at entry: </span><span class="si">%s</span><span class="s">: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">counter</span><span class="p">,</span> <span class="n">queue</span><span class="p">[</span><span class="n">counter</span><span class="p">]))</span>
+            <span class="c"># add dump queue to current queue, already scanned URLs are appended at the end of the queue</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">put_new_list</span><span class="p">(</span><span class="n">queue</span><span class="p">[</span><span class="n">counter</span><span class="p">:]</span> <span class="o">+</span> <span class="n">queue</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">counter</span><span class="p">],</span> <span class="bp">True</span><span class="p">)</span>
+            <span class="c"># set current counter to dump counter</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_counter</span> <span class="o">=</span> <span class="n">counter</span>
+
+<div class="viewcode-block" id="QueueManager.next_host"><a class="viewcode-back" href="../../server.queue_manager.html#server.queue_manager.QueueManager.next_host">[docs]</a>    <span class="k">def</span> <span class="nf">next_host</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Getting next hostname from the appropriate queue.</span>
+
+<span class="sd">        :return str: hostname e.g. &quot;google.com&quot;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_counter</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_counter</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dump_threshold</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">Dumper</span><span class="o">.</span><span class="n">dump_counter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_counter</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_result_queue</span><span class="o">.</span><span class="n">qsize</span><span class="p">()</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_result_queue_threshold</span><span class="p">:</span>
+            <span class="k">print</span><span class="p">(</span><span class="s">&quot;result_queue full, check if result_worker is running&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_user_queue</span><span class="o">.</span><span class="n">empty</span><span class="p">():</span>
+            <span class="c"># Trap for prioritizing the user_queue</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_user_queue</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">hostname</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_host_queue</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">timeout</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">Empty</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span>
+
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_filling_condition</span><span class="p">:</span>
+            <span class="k">while</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_filling</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_filling_condition</span><span class="o">.</span><span class="n">wait</span><span class="p">()</span>
+
+        <span class="c"># cycle queue</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_host_queue</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">hostname</span><span class="p">)</span>
+
+        <span class="c"># checking if new list is available</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">put_new_list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_new_list_holder</span><span class="p">)</span>
+
+        <span class="c"># keep track by counting</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_counter</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="c"># Keep track of how many times the host_queue has been &quot;parsed&quot; by sslyze</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_counter</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_host_queue</span><span class="o">.</span><span class="n">qsize</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_counter</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_times_fully_parsed</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="k">return</span> <span class="n">hostname</span><span class="p">,</span> <span class="bp">None</span></div>
+
+<div class="viewcode-block" id="QueueManager.empty_queue"><a class="viewcode-back" href="../../server.queue_manager.html#server.queue_manager.QueueManager.empty_queue">[docs]</a>    <span class="k">def</span> <span class="nf">empty_queue</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Empty entire queue.</span>
+<span class="sd">            .. note::</span>
+
+<span class="sd">                *use this function with care*. it will empty the whole host_queue.</span>
+<span class="sd">                even if the host_queue has not finished yet.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_counter</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_host_source_dict</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="k">while</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_host_queue</span><span class="o">.</span><span class="n">empty</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_host_queue</span><span class="o">.</span><span class="n">get</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="QueueManager.put_user"><a class="viewcode-back" href="../../server.queue_manager.html#server.queue_manager.QueueManager.put_user">[docs]</a>    <span class="k">def</span> <span class="nf">put_user</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">user_request</span><span class="p">,</span> <span class="n">user_id</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Function will store any user requested urls to _user_queue</span>
+<span class="sd">        and ready the _user_result_dict for an incoming sslyze result</span>
+<span class="sd">        corresponding to user_id</span>
+
+<span class="sd">        :param list user_request: the url requested to be checked by sslyze</span>
+<span class="sd">        :param user_id: unique user identifier corresponding to the request</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_user_result_dict</span><span class="p">[</span><span class="n">user_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">Queue</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_user_queue</span><span class="o">.</span><span class="n">put</span><span class="p">((</span><span class="n">user_request</span><span class="p">,</span> <span class="n">user_id</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="QueueManager.put_new_list"><a class="viewcode-back" href="../../server.queue_manager.html#server.queue_manager.QueueManager.put_new_list">[docs]</a>    <span class="k">def</span> <span class="nf">put_new_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_list</span><span class="p">,</span> <span class="n">from_dump</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Empty and refill the queue.</span>
+
+<span class="sd">        :param list new_list: nested list with hostname and source e.g. [ [&quot;google.com&quot;, [&quot;alexa-top-1m&quot;, ] ], ]</span>
+<span class="sd">        :param bool from_dump: should be set to True if function call is used to fill the queue from dump</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_new_list_holder</span> <span class="o">=</span> <span class="n">new_list</span>
+
+        <span class="c"># if no list has been supplied, leave method and continue</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_new_list_holder</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="c"># Trap if sslyze is working the list for the fist time or is in the middle of working it the n-th time</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_counter</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_times_fully_parsed</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="c"># dump</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">from_dump</span><span class="p">:</span>
+            <span class="n">Dumper</span><span class="o">.</span><span class="n">dump_queue</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_new_list_holder</span><span class="p">)</span>
+
+        <span class="k">print</span><span class="p">(</span><span class="s">&quot;adding new list ...&quot;</span><span class="p">)</span>
+        <span class="c"># indicates that the queue will be filled currently</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_is_filling</span> <span class="o">=</span> <span class="bp">True</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">empty_queue</span><span class="p">()</span>  <span class="c"># self_counter is reset to 0 in here</span>
+
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">item</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">new_list</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_host_source_dict</span><span class="p">[</span><span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">=</span> <span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_host_queue</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+        <span class="k">print</span><span class="p">(</span><span class="s">&quot;new list was added&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_times_fully_parsed</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_current_list_holder</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_new_list_holder</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_new_list_holder</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_is_filling</span> <span class="o">=</span> <span class="bp">False</span>
+
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_filling_condition</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_filling_condition</span><span class="o">.</span><span class="n">notify_all</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="QueueManager.next_result"><a class="viewcode-back" href="../../server.queue_manager.html#server.queue_manager.QueueManager.next_result">[docs]</a>    <span class="k">def</span> <span class="nf">next_result</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Getting next result from result_queue.</span>
+
+<span class="sd">        :return tuple: ({sslyze result}, [source,])</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_result_queue</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+        <span class="n">target</span> <span class="o">=</span> <span class="n">res</span><span class="p">[</span><span class="s">&quot;target&quot;</span><span class="p">]</span>
+        <span class="n">res</span><span class="p">[</span><span class="s">&quot;source&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_host_source_dict</span><span class="p">[</span><span class="n">target</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+        <span class="k">return</span> <span class="n">res</span></div>
+
+<div class="viewcode-block" id="QueueManager.get_user_result"><a class="viewcode-back" href="../../server.queue_manager.html#server.queue_manager.QueueManager.get_user_result">[docs]</a>    <span class="k">def</span> <span class="nf">get_user_result</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">user_id</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Function will get and return the result</span>
+<span class="sd">        corresponding to the supplied user_id</span>
+
+<span class="sd">        :param user_id: the user_id to identify which result to get</span>
+<span class="sd">        :return: the sslyze result</span>
+
+<span class="sd">        .. note::   _inner_result_queue is a local field and will not be available beyond</span>
+<span class="sd">                    this function</span>
+<span class="sd">                    There will be only one sslyze result per user_id</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_user_result_dict</span><span class="p">[</span><span class="n">user_id</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="mi">30</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">Empty</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">error</span><span class="o">=</span><span class="s">&quot;internal timeout&quot;</span><span class="p">)</span>
+
+        <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_user_result_dict</span><span class="p">[</span><span class="n">user_id</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">result</span></div>
+
+<div class="viewcode-block" id="QueueManager.put_result"><a class="viewcode-back" href="../../server.queue_manager.html#server.queue_manager.QueueManager.put_result">[docs]</a>    <span class="k">def</span> <span class="nf">put_result</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">result</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Adding a result to result_queue.</span>
+<span class="sd">        :param result: the sslyze result to pe added to the _result.queue</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c"># set start time when first result has finished</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_result_counter</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_start_time</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_result_counter</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_result_queue</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">result</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="QueueManager.put_user_result"><a class="viewcode-back" href="../../server.queue_manager.html#server.queue_manager.QueueManager.put_user_result">[docs]</a>    <span class="k">def</span> <span class="nf">put_user_result</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">result</span><span class="p">,</span> <span class="n">user_id</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Function will will add an sslyze result to the _user_result_dict</span>
+<span class="sd">        :param result: the sslyze result to be added</span>
+<span class="sd">        :param user_id: the user identifier for the corresponding result</span>
+<span class="sd">        .. note::   _inner_result_queue is a local field and will not be available beyond</span>
+<span class="sd">                    this function</span>
+<span class="sd">                    There will be only one sslyze result per user_id</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">_inner_result_queue</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_user_result_dict</span><span class="p">[</span><span class="n">user_id</span><span class="p">]</span>
+        <span class="n">_inner_result_queue</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">result</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="QueueManager.status"><a class="viewcode-back" href="../../server.queue_manager.html#server.queue_manager.QueueManager.status">[docs]</a>    <span class="k">def</span> <span class="nf">status</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">exec_time</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_start_time</span>
+        <span class="n">status_dict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+            <span class="n">host_queue_size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_host_queue</span><span class="o">.</span><span class="n">qsize</span><span class="p">(),</span>
+            <span class="n">counter</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_counter</span><span class="p">,</span>
+            <span class="n">completed</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_result_counter</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span>
+            <span class="n">scantime</span><span class="o">=</span><span class="n">exec_time</span><span class="p">,</span>
+            <span class="n">avgtime</span><span class="o">=</span><span class="n">exec_time</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">_result_counter</span><span class="p">,</span>
+            <span class="n">result_queue_size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_result_queue</span><span class="o">.</span><span class="n">qsize</span><span class="p">(),</span>
+            <span class="n">user_queue_size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_user_queue</span><span class="o">.</span><span class="n">qsize</span><span class="p">(),</span>
+            <span class="n">dump_limit</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_dump_threshold</span><span class="p">,</span>
+            <span class="n">result_queue_limit</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_result_queue_threshold</span><span class="p">,</span>
+            <span class="n">is_filling</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_is_filling</span><span class="p">,</span>
+            <span class="n">fully_scanned</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_times_fully_parsed</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">status_dict</span></div></div>
+
+
+<div class="viewcode-block" id="QueueClient"><a class="viewcode-back" href="../../server.queue_manager.html#server.queue_manager.QueueClient">[docs]</a><span class="k">class</span> <span class="nc">QueueClient</span><span class="p">(</span><span class="n">BaseManager</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This class is used to connect to QueueServer.</span>
+
+<span class="sd">    If you instantiate this class it will auto connect to the server.</span>
+<span class="sd">    So you can get an instance by name of each registered object.</span>
+
+<span class="sd">    :Example:</span>
+
+<span class="sd">    ::</span>
+
+<span class="sd">        from queue_manager import QueueClient</span>
+
+<span class="sd">        c = QueueClient()</span>
+
+<span class="sd">        # registered name is &quot;queue_manager&quot; , so you can call it to get</span>
+<span class="sd">        # the instance of QueueManager class.</span>
+<span class="sd">        queue_manager = c.queue_manager()</span>
+
+<span class="sd">        # do something with queue_manager ...</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">address</span><span class="o">=</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">SERVER_ADDRESS</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">SERVER_PORT</span><span class="p">),</span>
+                 <span class="n">authkey</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">SERVER_AUTH</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="s">&#39;queue_manager&#39;</span><span class="p">)</span>
+        <span class="n">BaseManager</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">address</span><span class="o">=</span><span class="n">address</span><span class="p">,</span> <span class="n">authkey</span><span class="o">=</span><span class="n">authkey</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="QueueServer"><a class="viewcode-back" href="../../server.queue_manager.html#server.queue_manager.QueueServer">[docs]</a><span class="k">class</span> <span class="nc">QueueServer</span><span class="p">(</span><span class="n">BaseManager</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The QueueServer ...</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="s">&#39;queue_manager&#39;</span><span class="p">,</span> <span class="nb">callable</span><span class="o">=</span><span class="n">QueueManager</span><span class="p">())</span>
+        <span class="n">BaseManager</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">address</span><span class="o">=</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">SERVER_ADDRESS</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">SERVER_PORT</span><span class="p">),</span>
+                             <span class="n">authkey</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">SERVER_AUTH</span><span class="p">)</span></div>
+
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">m</span> <span class="o">=</span> <span class="n">QueueServer</span><span class="p">()</span>
+    <span class="n">s</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">get_server</span><span class="p">()</span>
+    <span class="k">print</span><span class="p">(</span><span class="s">&quot;starting QueueServer at </span><span class="si">%s</span><span class="s">:</span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">SERVER_ADDRESS</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">SERVER_PORT</span><span class="p">))</span>
+    <span class="n">s</span><span class="o">.</span><span class="n">serve_forever</span><span class="p">()</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2015, dhoeyng.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'0.1',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

@@ -1,0 +1,469 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>worker.input_worker &mdash; hotcat 0.1 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="hotcat 0.1 documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> hotcat
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../OVERVIEW.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../INSTALLATION.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../USAGE.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../settings.html">Settings</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../../index.html">hotcat</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+      
+    <li>worker.input_worker</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for worker.input_worker</h1><div class="highlight"><pre>
+<span class="kn">from</span> <span class="nn">server.queue_manager</span> <span class="kn">import</span> <span class="n">QueueClient</span>
+<span class="kn">import</span> <span class="nn">requests</span><span class="o">,</span> <span class="nn">zipfile</span><span class="o">,</span> <span class="nn">StringIO</span><span class="o">,</span> <span class="nn">time</span><span class="o">,</span> <span class="nn">datetime</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">urllib</span><span class="o">,</span> <span class="nn">multiprocessing</span>
+<span class="kn">from</span> <span class="nn">lxml</span> <span class="kn">import</span> <span class="n">etree</span>
+
+<span class="n">alexa_splits</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1000000</span><span class="p">,</span> <span class="mi">1000</span><span class="p">,</span> <span class="mi">100</span><span class="p">]</span>
+<span class="n">nextDownloadDate</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">date</span><span class="o">.</span><span class="n">today</span><span class="p">()</span>
+<span class="n">csvPath</span> <span class="o">=</span> <span class="s">&quot;../data/top-1m.csv&quot;</span>
+
+
+<div class="viewcode-block" id="datedAlexaCSV"><a class="viewcode-back" href="../../worker.input_worker.html#worker.input_worker.datedAlexaCSV">[docs]</a><span class="k">def</span> <span class="nf">datedAlexaCSV</span><span class="p">(</span><span class="n">split_list</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Creates a list of URLs from the Alexa top Million Websites with corresponding dated Sources.</span>
+
+<span class="sd">    The Data provided by Alexa is a CSV-file with each line consisting of a number and an URL.</span>
+
+<span class="sd">    :param split_list: List of Numbers according to which the Sources are to be divided to. MUST NOT BE EMPTY!</span>
+<span class="sd">    :return: List of Entries, each a List containing: a String of a Target-URL and a List of Source-Strings.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">date</span> <span class="o">=</span> <span class="n">getAlexaCSV</span><span class="p">()</span>
+    <span class="n">splits</span> <span class="o">=</span> <span class="n">split_list</span><span class="p">[:]</span>
+    <span class="n">splits</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+    <span class="n">max_entry</span> <span class="o">=</span> <span class="n">splits</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">splits</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span>
+    <span class="n">ret_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">csvPath</span><span class="p">,</span> <span class="s">&quot;r&quot;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">max_entry</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">i</span> <span class="o">&gt;</span> <span class="n">splits</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+            <span class="n">splits</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">splits</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">count</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39;,&#39;</span>
+        <span class="n">target</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">count</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">)</span>
+        <span class="n">sources</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">splits</span><span class="p">:</span>
+            <span class="n">sources</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">date</span> <span class="o">+</span> <span class="s">&quot;AlexaTOP&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">s</span><span class="p">))</span>
+        <span class="n">ret_list</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">target</span><span class="p">,</span> <span class="n">sources</span><span class="p">])</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="n">ret_list</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">ret_list</span></div>
+
+
+<div class="viewcode-block" id="getAlexaCSV"><a class="viewcode-back" href="../../worker.input_worker.html#worker.input_worker.getAlexaCSV">[docs]</a><span class="k">def</span> <span class="nf">getAlexaCSV</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Downloads the alexa top 1 million list.</span>
+
+<span class="sd">    :return: Todays date</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">updateDownloadDate</span><span class="p">()</span>
+    <span class="c">#downloads from url</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&quot;http://s3.amazonaws.com/alexa-static/top-1m.csv.zip&quot;</span><span class="p">)</span>
+    <span class="k">print</span><span class="p">(</span><span class="s">&quot;Finished downloading alexa top 1 million zip. Starting extraction...&quot;</span><span class="p">)</span>
+    <span class="c">#unzips</span>
+    <span class="n">z</span> <span class="o">=</span> <span class="n">zipfile</span><span class="o">.</span><span class="n">ZipFile</span><span class="p">(</span><span class="n">StringIO</span><span class="o">.</span><span class="n">StringIO</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">content</span><span class="p">))</span>
+    <span class="c">#checks if folder &quot;data&quot; exists, will be created if not</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="s">&quot;../data/&quot;</span><span class="p">):</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="s">&quot;../data/&quot;</span><span class="p">)</span>
+    <span class="n">z</span><span class="o">.</span><span class="n">extractall</span><span class="p">(</span><span class="s">&quot;../data/&quot;</span><span class="p">)</span>
+    <span class="k">print</span><span class="p">(</span><span class="s">&quot;Finished extracting alexa top 1 million zip. Building list...&quot;</span><span class="p">)</span>
+    <span class="c">#get date as &quot;dd.mm.yyyy&quot;</span>
+    <span class="n">today</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s">&quot;</span><span class="si">%d</span><span class="s">.%m.%Y&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">today</span></div>
+
+
+<div class="viewcode-block" id="updateDownloadDate"><a class="viewcode-back" href="../../worker.input_worker.html#worker.input_worker.updateDownloadDate">[docs]</a><span class="k">def</span> <span class="nf">updateDownloadDate</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Creates a date, that will be used to check if a new version of the alexa top-1m.csv is available.</span>
+<span class="sd">    The new list should be available on 20th every month.</span>
+
+<span class="sd">    Changes variable nextDownloadDate to the date, when a new list should be available.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">now</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">today</span><span class="p">()</span>
+    <span class="n">day</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">now</span><span class="p">,</span> <span class="s">&#39;day&#39;</span><span class="p">)</span>
+    <span class="n">month</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">now</span><span class="p">,</span> <span class="s">&#39;month&#39;</span><span class="p">)</span>
+    <span class="n">year</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">now</span><span class="p">,</span> <span class="s">&#39;year&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">day</span> <span class="o">&gt;</span> <span class="mi">20</span><span class="p">:</span>
+        <span class="n">month</span> <span class="o">=</span> <span class="n">month</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="n">month</span> <span class="o">&gt;</span> <span class="mi">12</span><span class="p">:</span>
+            <span class="n">month</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="n">year</span> <span class="o">=</span> <span class="n">year</span> <span class="o">+</span> <span class="mi">1</span>
+    <span class="n">day</span> <span class="o">=</span> <span class="mi">20</span>
+    <span class="n">nextDownloadDate</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">date</span><span class="p">(</span><span class="n">year</span><span class="p">,</span><span class="n">month</span><span class="p">,</span><span class="n">day</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="joinLists"><a class="viewcode-back" href="../../worker.input_worker.html#worker.input_worker.joinLists">[docs]</a><span class="k">def</span> <span class="nf">joinLists</span><span class="p">(</span><span class="n">listA</span><span class="p">,</span> <span class="n">listB</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Joins together two URL-Source-Lists without duplicates.</span>
+
+<span class="sd">    ListA is extended by the entries of listB and will be the joined list.</span>
+<span class="sd">    If the same URL occurs in both lists, that entry&#39;s source-list in listB is added to listA .</span>
+
+<span class="sd">    :param listA: URL-Source-List. MUST BE SORTED!, MUST NOT BE EMPTY!</span>
+<span class="sd">    :param listB: URL-Source-List. MUST BE SORTED!, MUST NOT BE EMPTY!</span>
+<span class="sd">    :return: The joined URL-Source-List.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">listA</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
+    <span class="n">b</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">listB</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
+    <span class="k">while</span> <span class="n">b</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">listA</span><span class="p">[</span><span class="n">a</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">listB</span><span class="p">[</span><span class="n">b</span><span class="p">][</span><span class="mi">0</span><span class="p">]:</span>
+            <span class="n">listA</span><span class="p">[</span><span class="n">a</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">listB</span><span class="p">[</span><span class="n">b</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span>
+            <span class="n">a</span> <span class="o">-=</span> <span class="mi">1</span>
+            <span class="n">b</span> <span class="o">-=</span> <span class="mi">1</span>
+        <span class="k">elif</span> <span class="n">listA</span><span class="p">[</span><span class="n">a</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">listB</span><span class="p">[</span><span class="n">b</span><span class="p">][</span><span class="mi">0</span><span class="p">]:</span>
+            <span class="n">listA</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">a</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">listB</span><span class="p">[</span><span class="n">b</span><span class="p">])</span>
+            <span class="n">b</span> <span class="o">-=</span> <span class="mi">1</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">a</span> <span class="o">-=</span> <span class="mi">1</span>
+    <span class="k">return</span> <span class="n">listA</span></div>
+
+
+<div class="viewcode-block" id="joinListOfLists"><a class="viewcode-back" href="../../worker.input_worker.html#worker.input_worker.joinListOfLists">[docs]</a><span class="k">def</span> <span class="nf">joinListOfLists</span><span class="p">(</span><span class="n">CountryLists</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Merges a whole list of URL-Source-Lists into a single URL-Source-Lists via the joinLists Method.</span>
+
+<span class="sd">    :param CountryLists: List of URL-Source-Lists. MUST NOT BE EMPTY!</span>
+<span class="sd">    :return: The joined URL-Source-List.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">print</span><span class="p">(</span><span class="s">&quot;Starting JoinListOfLists&quot;</span><span class="p">)</span>
+    <span class="k">print</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">CountryLists</span><span class="p">))</span>
+    <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">CountryLists</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">m</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">CountryLists</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span> <span class="o">-</span> <span class="mi">1</span>
+        <span class="k">while</span> <span class="n">m</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">joinLists</span><span class="p">(</span><span class="n">CountryLists</span><span class="p">[</span><span class="n">m</span><span class="p">],</span> <span class="n">CountryLists</span><span class="o">.</span><span class="n">pop</span><span class="p">())</span>
+            <span class="n">m</span> <span class="o">-=</span> <span class="mi">1</span>
+    <span class="k">print</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">CountryLists</span><span class="p">))</span>
+    <span class="k">print</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">CountryLists</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+    <span class="k">return</span> <span class="n">CountryLists</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="DownLoader"><a class="viewcode-back" href="../../worker.input_worker.html#worker.input_worker.DownLoader">[docs]</a><span class="k">class</span> <span class="nc">DownLoader</span><span class="p">():</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Downloader to get all necessary information.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        url contains the url, that will be downloaded.</span>
+<span class="sd">        contents contains the content of the url, after it is downloaded</span>
+
+<span class="sd">        :param url: url, that will be downloaded</span>
+<span class="sd">        :return: NULL</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">url</span> <span class="o">=</span> <span class="n">url</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">contents</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+
+<div class="viewcode-block" id="DownLoader.download"><a class="viewcode-back" href="../../worker.input_worker.html#worker.input_worker.DownLoader.download">[docs]</a>    <span class="k">def</span> <span class="nf">download</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Creates a browser to get all necessary information. This information will be stored in self.contents</span>
+<span class="sd">        :return: NULL</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c">#print self.url</span>
+        <span class="n">browser</span> <span class="o">=</span> <span class="n">urllib</span><span class="o">.</span><span class="n">urlopen</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">url</span><span class="p">)</span>
+        <span class="n">response</span> <span class="o">=</span> <span class="n">browser</span><span class="o">.</span><span class="n">getcode</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">response</span> <span class="o">==</span> <span class="mi">200</span><span class="p">:</span> <span class="c">#success</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">contents</span> <span class="o">=</span> <span class="n">browser</span><span class="o">.</span><span class="n">read</span><span class="p">()</span></div></div>
+
+
+<div class="viewcode-block" id="alexaParser"><a class="viewcode-back" href="../../worker.input_worker.html#worker.input_worker.alexaParser">[docs]</a><span class="k">class</span> <span class="nc">alexaParser</span><span class="p">(</span><span class="n">DownLoader</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Class for parsing alexa.com/topsites/countries*</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">url</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :param url: url, that will be downloaded</span>
+<span class="sd">        :return: NULL</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">DownLoader</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">url</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">topsiteShort</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">topsiteName</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+
+<div class="viewcode-block" id="alexaParser.getSiteNames"><a class="viewcode-back" href="../../worker.input_worker.html#worker.input_worker.alexaParser.getSiteNames">[docs]</a>    <span class="k">def</span> <span class="nf">getSiteNames</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Downloads the specified url and fetches the links to all countrie top 500 sites.</span>
+<span class="sd">        This links will be stored in self.topsiteShort</span>
+<span class="sd">        :return: NULL</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">download</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">contents</span><span class="p">:</span>
+            <span class="n">tree</span> <span class="o">=</span> <span class="n">etree</span><span class="o">.</span><span class="n">HTML</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">contents</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">topsiteShort</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">xpath</span><span class="p">(</span><span class="s">&quot;//div/div/ul/li//a/@href&quot;</span><span class="p">)</span><span class="c">#Get links to contrie sites</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">topsiteName</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">xpath</span><span class="p">(</span><span class="s">&quot;/html/body//div/div/ul/li/a/text()&quot;</span><span class="p">)</span><span class="c">#Get countrieNames</span></div></div>
+
+
+<div class="viewcode-block" id="getContent"><a class="viewcode-back" href="../../worker.input_worker.html#worker.input_worker.getContent">[docs]</a><span class="k">def</span> <span class="nf">getContent</span><span class="p">(</span><span class="n">shortName</span><span class="p">,</span> <span class="n">countrieName</span><span class="p">,</span> <span class="n">today</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Fetches all sites in the top 500 for the country with short name shortName.</span>
+
+<span class="sd">    :param shortName: The two Letter shortName of the wanted country</span>
+<span class="sd">    :param countrieName: full name of the country</span>
+<span class="sd">    :param today: todays date</span>
+<span class="sd">    :return: a sorted list with all 500 entries as [[&quot;url1&quot;,[date+countryName]],&quot;url2&quot;,[date+countryName],...]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">parser</span> <span class="o">=</span> <span class="n">alexaParser</span><span class="p">(</span><span class="s">&quot;&quot;</span><span class="p">)</span>
+    <span class="n">sites</span><span class="o">=</span><span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">20</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">i</span><span class="o">==</span><span class="mi">0</span><span class="p">:</span>
+            <span class="n">parser</span><span class="o">.</span><span class="n">url</span> <span class="o">=</span> <span class="s">&quot;http://www.alexa.com/topsites/countries&quot;</span> <span class="o">+</span> <span class="s">&quot;/&quot;</span> <span class="o">+</span><span class="n">shortName</span>
+            <span class="k">print</span><span class="p">(</span><span class="s">&quot;Starting to parse country: </span><span class="si">%s</span><span class="s">(</span><span class="si">%s</span><span class="s">)&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">countrieName</span><span class="p">,</span> <span class="n">shortName</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">parser</span><span class="o">.</span><span class="n">url</span> <span class="o">=</span> <span class="s">&quot;http://www.alexa.com/topsites/countries&quot;</span> <span class="o">+</span><span class="s">&quot;;&quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">+</span><span class="s">&quot;/&quot;</span><span class="o">+</span> <span class="n">shortName</span>
+        <span class="n">parser</span><span class="o">.</span><span class="n">download</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">parser</span><span class="o">.</span><span class="n">contents</span><span class="p">:</span>
+            <span class="n">tree</span> <span class="o">=</span> <span class="n">etree</span><span class="o">.</span><span class="n">HTML</span><span class="p">(</span><span class="n">parser</span><span class="o">.</span><span class="n">contents</span><span class="p">)</span>
+            <span class="n">topsiteList</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">xpath</span><span class="p">(</span><span class="s">&quot;//section/div/ul/li/div/p/a/text()&quot;</span><span class="p">)</span>
+            <span class="n">sites</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">topsiteList</span><span class="p">)</span>
+    <span class="n">sites</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+    <span class="n">returnValue</span><span class="o">=</span><span class="p">[]</span>
+    <span class="k">for</span> <span class="n">url</span> <span class="ow">in</span> <span class="n">sites</span><span class="p">:</span>
+                <span class="n">sources</span> <span class="o">=</span> <span class="p">[[</span><span class="n">url</span><span class="p">,[</span><span class="n">today</span><span class="o">+</span><span class="n">countrieName</span><span class="p">]]]</span>
+                <span class="n">returnValue</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">sources</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">returnValue</span></div>
+
+
+<div class="viewcode-block" id="startTop500Parsing"><a class="viewcode-back" href="../../worker.input_worker.html#worker.input_worker.startTop500Parsing">[docs]</a><span class="k">def</span> <span class="nf">startTop500Parsing</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Contains all necessary information to start the top 500 parsing.</span>
+
+<span class="sd">    :return: returns a multi-dimensional array with all countries and their top 500 websites, as</span>
+<span class="sd">             a sorted list with all 500 entries as [[[&quot;url1&quot;,[date+countryName1]],&quot;url2&quot;,[date+countryName1],...],</span>
+<span class="sd">                                                    [[&quot;url1&quot;,[date+countryName2]],&quot;url2&quot;,[date+countryName2],...],</span>
+<span class="sd">                                                                     ...                                         ]</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">today</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s">&quot;</span><span class="si">%d</span><span class="s">.%m.%Y&quot;</span><span class="p">)</span>
+    <span class="n">url</span> <span class="o">=</span> <span class="s">&quot;http://www.alexa.com/topsites/countries&quot;</span>
+    <span class="n">alexa_parser</span> <span class="o">=</span> <span class="n">alexaParser</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+    <span class="n">alexa_parser</span><span class="o">.</span><span class="n">getSiteNames</span><span class="p">()</span>
+    <span class="c">#fetching shortName out of the link</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">alexa_parser</span><span class="o">.</span><span class="n">topsiteShort</span><span class="p">)):</span>
+        <span class="nb">object</span> <span class="o">=</span> <span class="n">alexa_parser</span><span class="o">.</span><span class="n">topsiteShort</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="n">alexa_parser</span><span class="o">.</span><span class="n">topsiteShort</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="nb">object</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">:]</span>
+    <span class="n">pool</span> <span class="o">=</span> <span class="n">multiprocessing</span><span class="o">.</span><span class="n">Pool</span><span class="p">(</span><span class="n">processes</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+    <span class="n">output</span> <span class="o">=</span> <span class="p">[</span><span class="n">pool</span><span class="o">.</span><span class="n">apply_async</span><span class="p">(</span><span class="n">getContent</span><span class="p">,</span><span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">alexa_parser</span><span class="o">.</span><span class="n">topsiteShort</span><span class="p">[</span><span class="n">x</span><span class="p">],</span><span class="n">alexa_parser</span><span class="o">.</span><span class="n">topsiteName</span><span class="p">[</span><span class="n">x</span><span class="p">],</span><span class="n">today</span><span class="p">,))</span> \
+              <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">alexa_parser</span><span class="o">.</span><span class="n">topsiteShort</span><span class="p">))]</span>
+    <span class="n">results</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">get</span><span class="p">()</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">output</span><span class="p">]</span>
+    <span class="n">resultValues</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">listComponent</span> <span class="ow">in</span> <span class="n">results</span><span class="p">:</span>
+        <span class="n">resultValues</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="n">listComponent</span><span class="p">])</span>
+    <span class="c">#print(resultValues)</span>
+    <span class="k">return</span> <span class="n">resultValues</span></div>
+
+
+<div class="viewcode-block" id="fetchInput"><a class="viewcode-back" href="../../worker.input_worker.html#worker.input_worker.fetchInput">[docs]</a><span class="k">def</span> <span class="nf">fetchInput</span><span class="p">(</span><span class="n">queue_manager</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Downloads top-1m.csv, parses top500 country lists, merges them and sends them to queue_manager.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Can be used, if merging of the lists works</span>
+
+<span class="sd">    #top500ListOfLists = startTop500Parsing()</span>
+<span class="sd">    #top500List = joinListOfLists(top500ListOfLists)</span>
+<span class="sd">    #top1MioList = datedAlexaCSV(alexa_splits)</span>
+<span class="sd">    #queue_manager.put_new_list(joinLists(top1MioList,top500List))</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">queue_manager</span><span class="o">.</span><span class="n">put_new_list</span><span class="p">(</span><span class="n">datedAlexaCSV</span><span class="p">(</span><span class="n">alexa_splits</span><span class="p">))</span>
+    <span class="k">print</span><span class="p">(</span><span class="s">&quot;Finished building and sending list.&quot;</span><span class="p">)</span></div>
+
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="c"># get instance of QueueClient</span>
+    <span class="n">c</span> <span class="o">=</span> <span class="n">QueueClient</span><span class="p">()</span>
+    <span class="c"># get appropriate queue from QueueClient</span>
+    <span class="n">queue_manager</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">queue_manager</span><span class="p">()</span>
+    <span class="n">fetchInput</span><span class="p">(</span><span class="n">queue_manager</span><span class="p">)</span>
+    <span class="k">while</span><span class="p">(</span><span class="bp">True</span><span class="p">):</span>
+        <span class="n">t</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">today</span><span class="p">()</span><span class="c">#converting datetime.datetime.today object into datetime.date object</span>
+        <span class="n">today</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">date</span><span class="p">(</span><span class="n">t</span><span class="o">.</span><span class="n">year</span><span class="p">,</span><span class="n">t</span><span class="o">.</span><span class="n">month</span><span class="p">,</span><span class="n">t</span><span class="o">.</span><span class="n">day</span><span class="p">)</span><span class="c">#converting datetime.datetime.today object into datetime.date object</span>
+        <span class="k">if</span> <span class="n">today</span> <span class="o">&gt;</span> <span class="n">nextDownloadDate</span><span class="p">:</span>
+            <span class="n">fetchInput</span><span class="p">(</span><span class="n">queue_manager</span><span class="p">)</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">csvPath</span><span class="p">)</span>
+        <span class="k">print</span><span class="p">(</span><span class="s">&quot;sleeping now&quot;</span><span class="p">)</span>
+        <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">86400</span><span class="p">)</span><span class="c">#sleeps for 86400 seconds, ~1 day</span>
+
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2015, dhoeyng.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'0.1',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

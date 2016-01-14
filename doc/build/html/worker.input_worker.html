@@ -1,0 +1,347 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>worker.input_worker module &mdash; hotcat 0.1 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="hotcat 0.1 documentation" href="index.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> hotcat
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="OVERVIEW.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="INSTALLATION.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="USAGE.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="settings.html">Settings</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="index.html">hotcat</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+      
+    <li>worker.input_worker module</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-worker.input_worker">
+<span id="worker-input-worker-module"></span><h1>worker.input_worker module<a class="headerlink" href="#module-worker.input_worker" title="Permalink to this headline">¶</a></h1>
+<dl class="function">
+<dt id="worker.input_worker.datedAlexaCSV">
+<code class="descname">datedAlexaCSV</code><span class="sig-paren">(</span><em>split_list</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/worker/input_worker.html#datedAlexaCSV"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#worker.input_worker.datedAlexaCSV" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a list of URLs from the Alexa top Million Websites with corresponding dated Sources.</p>
+<p>The Data provided by Alexa is a CSV-file with each line consisting of a number and an URL.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>split_list</strong> &#8211; List of Numbers according to which the Sources are to be divided to. MUST NOT BE EMPTY!</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">List of Entries, each a List containing: a String of a Target-URL and a List of Source-Strings.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="worker.input_worker.getAlexaCSV">
+<code class="descname">getAlexaCSV</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/worker/input_worker.html#getAlexaCSV"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#worker.input_worker.getAlexaCSV" title="Permalink to this definition">¶</a></dt>
+<dd><p>Downloads the alexa top 1 million list.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Todays date</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="worker.input_worker.updateDownloadDate">
+<code class="descname">updateDownloadDate</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/worker/input_worker.html#updateDownloadDate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#worker.input_worker.updateDownloadDate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a date, that will be used to check if a new version of the alexa top-1m.csv is available.
+The new list should be available on 20th every month.</p>
+<p>Changes variable nextDownloadDate to the date, when a new list should be available.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="worker.input_worker.joinLists">
+<code class="descname">joinLists</code><span class="sig-paren">(</span><em>listA</em>, <em>listB</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/worker/input_worker.html#joinLists"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#worker.input_worker.joinLists" title="Permalink to this definition">¶</a></dt>
+<dd><p>Joins together two URL-Source-Lists without duplicates.</p>
+<p>ListA is extended by the entries of listB and will be the joined list.
+If the same URL occurs in both lists, that entry&#8217;s source-list in listB is added to listA .</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>listA</strong> &#8211; URL-Source-List. MUST BE SORTED!, MUST NOT BE EMPTY!</li>
+<li><strong>listB</strong> &#8211; URL-Source-List. MUST BE SORTED!, MUST NOT BE EMPTY!</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">The joined URL-Source-List.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="worker.input_worker.joinListOfLists">
+<code class="descname">joinListOfLists</code><span class="sig-paren">(</span><em>CountryLists</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/worker/input_worker.html#joinListOfLists"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#worker.input_worker.joinListOfLists" title="Permalink to this definition">¶</a></dt>
+<dd><p>Merges a whole list of URL-Source-Lists into a single URL-Source-Lists via the joinLists Method.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>CountryLists</strong> &#8211; List of URL-Source-Lists. MUST NOT BE EMPTY!</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The joined URL-Source-List.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="worker.input_worker.DownLoader">
+<em class="property">class </em><code class="descname">DownLoader</code><span class="sig-paren">(</span><em>url</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/worker/input_worker.html#DownLoader"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#worker.input_worker.DownLoader" title="Permalink to this definition">¶</a></dt>
+<dd><p>Downloader to get all necessary information.</p>
+<dl class="method">
+<dt id="worker.input_worker.DownLoader.download">
+<code class="descname">download</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/worker/input_worker.html#DownLoader.download"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#worker.input_worker.DownLoader.download" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a browser to get all necessary information. This information will be stored in self.contents
+:return: NULL</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="worker.input_worker.alexaParser">
+<em class="property">class </em><code class="descname">alexaParser</code><span class="sig-paren">(</span><em>url</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/worker/input_worker.html#alexaParser"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#worker.input_worker.alexaParser" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#worker.input_worker.DownLoader" title="worker.input_worker.DownLoader"><code class="xref py py-class docutils literal"><span class="pre">worker.input_worker.DownLoader</span></code></a></p>
+<p>Class for parsing alexa.com/topsites/countries*</p>
+<dl class="method">
+<dt id="worker.input_worker.alexaParser.getSiteNames">
+<code class="descname">getSiteNames</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/worker/input_worker.html#alexaParser.getSiteNames"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#worker.input_worker.alexaParser.getSiteNames" title="Permalink to this definition">¶</a></dt>
+<dd><p>Downloads the specified url and fetches the links to all countrie top 500 sites.
+This links will be stored in self.topsiteShort
+:return: NULL</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="worker.input_worker.getContent">
+<code class="descname">getContent</code><span class="sig-paren">(</span><em>shortName</em>, <em>countrieName</em>, <em>today</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/worker/input_worker.html#getContent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#worker.input_worker.getContent" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fetches all sites in the top 500 for the country with short name shortName.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>shortName</strong> &#8211; The two Letter shortName of the wanted country</li>
+<li><strong>countrieName</strong> &#8211; full name of the country</li>
+<li><strong>today</strong> &#8211; todays date</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">a sorted list with all 500 entries as [[&#8220;url1&#8221;,[date+countryName]],&#8221;url2&#8221;,[date+countryName],...]</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="worker.input_worker.startTop500Parsing">
+<code class="descname">startTop500Parsing</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/worker/input_worker.html#startTop500Parsing"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#worker.input_worker.startTop500Parsing" title="Permalink to this definition">¶</a></dt>
+<dd><p>Contains all necessary information to start the top 500 parsing.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">returns a multi-dimensional array with all countries and their top 500 websites, as
+a sorted list with all 500 entries as [[[&#8220;url1&#8221;,[date+countryName1]],&#8221;url2&#8221;,[date+countryName1],...],<blockquote>
+<div><dl class="docutils">
+<dt>[[&#8220;url1&#8221;,[date+countryName2]],&#8221;url2&#8221;,[date+countryName2],...],</dt>
+<dd>...                                         ]</dd>
+</dl>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="worker.input_worker.fetchInput">
+<code class="descname">fetchInput</code><span class="sig-paren">(</span><em>queue_manager</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/worker/input_worker.html#fetchInput"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#worker.input_worker.fetchInput" title="Permalink to this definition">¶</a></dt>
+<dd><p>Downloads top-1m.csv, parses top500 country lists, merges them and sends them to queue_manager.</p>
+</dd></dl>
+
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2015, dhoeyng.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'0.1',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>
