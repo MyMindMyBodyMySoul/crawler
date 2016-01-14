@@ -3,17 +3,18 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to HFT_Tls_Crawler's documentation!
+Welcome to Hotcat's documentation!
 ===========================================
 
-A TLS-Crawler based on `SSLyze <https://github.com/nabla-c0d3/sslyze>`_.
+Hotcat is a TLS-Scanner based on `SSLyze <https://github.com/nabla-c0d3/sslyze>`_.
 
 .. toctree::
    :maxdepth: 2
 
    OVERVIEW
+   INSTALLATION
    USAGE
-   MODULES
+   Settings <settings>
 
 
 

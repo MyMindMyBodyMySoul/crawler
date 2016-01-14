@@ -4,9 +4,11 @@ Modules
 .. toctree::
    :maxdepth: 2
 
-   hft_tls_crawler
-   input_worker
-   queue_manager
-   result_worker
+   hotcat
+
+   worker
+   server
+
    settings
-   sslyze_worker
+
+
