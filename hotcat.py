@@ -3,7 +3,7 @@ This module starts all required worker processes in the correct order.
 Just run:
     ::
 
-        $ python hft_tls_crawler.py
+        $ python hotcat.py
 """
 
 import os
@@ -18,7 +18,7 @@ import settings
 
 os.environ["PYTHONPATH"] = os.getcwd()
 
-#: holds the running processes
+# holds the running processes
 RUNNING_PROCESSES = []
 
 
@@ -57,7 +57,7 @@ def _sigint_handler(signum, frame):
     """
     print("### TERMINATION ###")
     for p, module in RUNNING_PROCESSES:
-        print("terminating %s with PID %s)" % (module, p.pid))
+        print("terminating %s with PID %s" % (module, p.pid))
         p.terminate()
         p.wait()
     sys.exit()
@@ -77,6 +77,8 @@ def _to_console(fd, module, pipe_type, msg, ts):
         color = 95
     elif module == "server.web":
         color = 96
+    elif module == "helper.status":
+        color = 0
     else:
         color = 0
 
@@ -91,7 +93,7 @@ def _to_file(fd, module, pipe_type, msg, ts):
 
 def main():
     """
-    Starts all modules which are listed in :data:`~hft_tls_crawler.MODULE_LIST`.
+    Starts all modules which are listed in :data:`~settings.MODULE_LIST`.
     """
 
     signal.signal(signal.SIGINT, _sigint_handler)
@@ -101,24 +103,29 @@ def main():
     print("Starting modules ...")
 
     for module in settings.MODULE_LIST:
+        p_count = 1
 
-        p = subprocess.Popen(
-            [os.path.join(settings.PYTHON_PATH, "python"), "-u", module.replace('.', '/') + '.py'],
-            env=os.environ,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE)
+        if module == "worker.sslyze_worker":
+            p_count = settings.NUMBER_PROCESSES
 
-        RUNNING_PROCESSES.append([p, module])
+        for i in range(p_count):
+            p = subprocess.Popen(
+                [os.path.join(settings.PYTHON_PATH, "python"), "-u", module.replace('.', '/') + '.py'],
+                env=os.environ,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE)
 
-        print("%s is running with PID %s" % (module, p.pid))
+            RUNNING_PROCESSES.append([p, module])
 
-        t = Thread(target=_enqueue_out, args=(p.stdout, module, q))
-        t.daemon = True  # thread dies with the program
-        t.start()
+            print("%s is running with PID %s" % (module, p.pid))
 
-        t = Thread(target=_enqueue_err, args=(p.stderr, module, q))
-        t.daemon = True  # thread dies with the program
-        t.start()
+            t = Thread(target=_enqueue_out, args=(p.stdout, module, q))
+            t.daemon = True  # thread dies with the program
+            t.start()
+
+            t = Thread(target=_enqueue_err, args=(p.stderr, module, q))
+            t.daemon = True  # thread dies with the program
+            t.start()
 
     print("")
 
