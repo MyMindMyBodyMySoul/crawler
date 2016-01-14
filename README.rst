@@ -29,4 +29,4 @@ Just run::
 
 Documentation
 -------------
-For all the details on how to install, use  and customize the Hotcat, see our `Documentation <https://hotcat.de>`_. 
+For all the details on how to install, use  and customize the Hotcat, see our `Documentation <https://hotcat.de/docs>`_.
