@@ -2,14 +2,12 @@
 This module fetches results out of the queue_manager and formats it in JSON to add it to da database
 """
 
-
 from server.queue_manager import QueueClient
 from pymongo import MongoClient, errors
 from time import sleep
 import datetime
 from tld import get_tld
 from helper.cipher_desc import CIPHER_DESC
-import socket
 
 
 class Database(object):
@@ -45,7 +43,6 @@ class Database(object):
 
 
 def _parse_cert(command_result):
-
     not_before = datetime.datetime.strptime(command_result['validity']['notBefore'], '%b %d %H:%M:%S %Y %Z')
     not_after = datetime.datetime.strptime(command_result['validity']['notAfter'], '%b %d %H:%M:%S %Y %Z')
     utc_ts = datetime.datetime.utcnow()
@@ -53,16 +50,16 @@ def _parse_cert(command_result):
     trusted_result = _is_trusted(command_result.get("trusted"))
 
     cert_dict = dict(
-        issuer=command_result['issuer'].get('commonName'),
-        subject=command_result['subject'].get('commonName'),
-        publicKeyLengh=int(command_result['subjectPublicKeyInfo'].get('publicKeySize')),
-        publicKeyAlgorithm=command_result['subjectPublicKeyInfo'].get('publicKeyAlgorithm'),
-        signatureAlgorithm=command_result.get('signatureAlgorithm'),
-        notValidBefore=not_before,
-        notValidAfter=not_after,
-        selfSigned=trusted_result.get('selfSigned'),
-        trusted=trusted_result.get('trusted'),
-        expired=False
+            issuer=command_result['issuer'].get('commonName'),
+            subject=command_result['subject'].get('commonName'),
+            publicKeyLengh=int(command_result['subjectPublicKeyInfo'].get('publicKeySize')),
+            publicKeyAlgorithm=command_result['subjectPublicKeyInfo'].get('publicKeyAlgorithm'),
+            signatureAlgorithm=command_result.get('signatureAlgorithm'),
+            notValidBefore=not_before,
+            notValidAfter=not_after,
+            selfSigned=trusted_result.get('selfSigned'),
+            trusted=trusted_result.get('trusted'),
+            expired=False
     )
 
     if not_after < utc_ts and utc_ts > not_before:
@@ -72,8 +69,8 @@ def _parse_cert(command_result):
 
 def _is_trusted(signed_result):
     trusted_result = dict(
-        selfSigned=True,
-        trusted=False
+            selfSigned=True,
+            trusted=False
     )
     if signed_result.get('Google') == 'ok':
         trusted_result['selfSigned'] = False
@@ -82,7 +79,6 @@ def _is_trusted(signed_result):
 
 
 def _parse_ciphers(result, protocol, public_key_size):
-
     ciphers_list = []
     key_status_list = [
         ('preferredCipherSuite', 'preferred'),
@@ -91,11 +87,11 @@ def _parse_ciphers(result, protocol, public_key_size):
         ('rejectedCipherSuites', 'rejected')
     ]
     protocol_dict = dict(
-        tlsv1='TLSv1.0',
-        tlsv1_1='TLSv1.1',
-        tlsv1_2='TLSv1.2',
-        sslv2='SSLv2',
-        sslv3='SSLv3',
+            tlsv1='TLSv1.0',
+            tlsv1_1='TLSv1.1',
+            tlsv1_2='TLSv1.2',
+            sslv2='SSLv2',
+            sslv3='SSLv3',
     )
 
     preferred_cipher = None
@@ -123,16 +119,16 @@ def _parse_ciphers(result, protocol, public_key_size):
                 ephemeral_flag = True
 
             cipher_dict = dict(
-                cipher=ssl_cipher,
-                protocol=protocol_dict.get(protocol),
-                status=result_status,
-                bits=bits,
-                kx=cipher_desc.get("kx"),
-                au=cipher_desc.get("au"),
-                enc=cipher_desc.get("enc"),
-                mac=cipher_desc.get("mac"),
-                export=cipher_desc.get("export"),
-                ephemeral=ephemeral_flag
+                    cipher=ssl_cipher,
+                    protocol=protocol_dict.get(protocol),
+                    status=result_status,
+                    bits=bits,
+                    kx=cipher_desc.get("kx"),
+                    au=cipher_desc.get("au"),
+                    enc=cipher_desc.get("enc"),
+                    mac=cipher_desc.get("mac"),
+                    export=cipher_desc.get("export"),
+                    ephemeral=ephemeral_flag
             )
 
             if dh_info:
@@ -165,7 +161,8 @@ def main():
             scan_error = False
             scan_date = datetime.datetime.now()
             domain = result.get("target")[0]
-            if socket.gethostbyname(domain) == domain:
+            ip = result.get("target")[1]
+            if ip == domain:
                 tld = None
             else:
                 tld = get_tld('https://' + domain, as_object=True, fail_silently=True).suffix
