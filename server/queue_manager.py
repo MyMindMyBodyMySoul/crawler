@@ -12,17 +12,16 @@ The server bind to address and port, which are specified in :mod:`settings`.
 """
 
 from multiprocessing.managers import BaseManager
-from threading import Lock, Condition
-from thread import start_new_thread
-import settings
+from threading import Condition
 from time import time
+
+import settings
+from helper.dumper import Dumper
 
 try:
     from queue import Queue, Empty
-    import cPickle, os
 except ImportError:
     from Queue import Queue, Empty
-    import cPickle, os
 
 
 class QueueManager(object):
@@ -36,11 +35,9 @@ class QueueManager(object):
             and get an instance of this class.
     """
     def __init__(self):
-        # Location and filename of the dumpfile
-        self._dump_location = os.path.join(os.path.dirname(__file__),'..','data','queue.dmp')
 
         # Threshold value describing intervals in which dumps will be created
-        self._dump_threshold = 500
+        self._dump_threshold = 10
 
         # Threshold for result_queue size
         self._result_queue_threshold = 500
@@ -48,7 +45,6 @@ class QueueManager(object):
         # Init queues
         self._host_queue = Queue()
         self._user_queue = Queue()
-        self._user_result_queue = Queue()
         self._result_queue = Queue()
 
         self._user_result_dict = {}
@@ -70,69 +66,18 @@ class QueueManager(object):
         self._start_time = time()
 
         # Check if dump file exists
-        start_new_thread(self.read_dump,())
+        Dumper.load(self._dump_ready)
 
     def __call__(self, *args, **kwargs):
         return self
 
-    def create_dump(self):
-        """
-        Function creates a dump of the current_list_holder and counter variable in data directory
-        First the counter variable is pickled, current_list_holder is pickled last.
-        """
-        print("creating dump at count: "+str(self._counter))
-        try:
-            dumpFile = open(self._dump_location,'wb+')
-            try:
-                cPickle.dump(self._counter, dumpFile, cPickle.HIGHEST_PROTOCOL)
-                cPickle.dump(self._current_list_holder, dumpFile, cPickle.HIGHEST_PROTOCOL)
-            except (cPickle.PickleError,cPickle.PicklingError) as pe:
-                print pe
-            finally:
-                dumpFile.close()
-        except OSError as oe:
-                    print oe
-        except Exception as ex:
-                #Catch everything unexpected
-            print("Unexpected error while creating dumpfile: ",ex)
-
-
-
-    def read_dump(self):
-        """
-        Function will look for a dump file in Data directory, read it and
-        initialize the host_queue in queue_manager accordingly
-            .. note::
-                This function assumes that counter variable has been pickled first and the
-                list representing the host_queue last.
-        """
-        if os.path.exists(self._dump_location):
-            print("Found dump file.")
-            try:
-                fileIn = open(self._dump_location,'rb+')
-                try:
-                    lastCounter = cPickle.load(fileIn)
-                    self._current_list_holder = cPickle.load(fileIn)
-                    print("Last iteration stopped at entry: "+str(lastCounter)+": "+str(self._current_list_holder[lastCounter]))
-                    if(lastCounter != 0):
-                        # Create a list in which already scanned URLs are appended at the end of the list
-                        tempList = self._current_list_holder[lastCounter : ]+self._current_list_holder[0 : lastCounter]
-                        self._current_list_holder = tempList
-                    self.put_new_list(self._current_list_holder)
-
-                except (cPickle.UnpicklingError, cPickle.UnpickleableError) as pe:
-                    print pe
-                finally:
-                    fileIn.close()
-            except OSError as oe:
-                print oe
-            except Exception as ex:
-                # Catch everything unexpected
-                print("Unexpected error while reading dump file: ",ex)
-        else:
-            print("No dump file found. Continuing with regular operation")
-
-
+    def _dump_ready(self, counter, queue):
+        if counter and queue:
+            print("Last iteration stopped at entry: %s: %s" % (counter, queue[counter]))
+            # add dump queue to current queue, already scanned URLs are appended at the end of the queue
+            self.put_new_list(queue[counter:] + queue[0:counter], True)
+            # set current counter to dump counter
+            self._counter = counter
 
     def next_host(self):
         """
@@ -140,8 +85,8 @@ class QueueManager(object):
 
         :return str: hostname e.g. "google.com"
         """
-        if (self._counter > 0 and self._counter % self._dump_threshold == 0):
-            start_new_thread(self.create_dump,())
+        if self._counter > 0 and self._counter % self._dump_threshold == 0:
+            Dumper.dump_counter(self._counter)
 
         if self._result_queue.qsize() >= self._result_queue_threshold:
             print("result_queue full, check if result_worker is running")
@@ -160,21 +105,21 @@ class QueueManager(object):
             while self._is_filling:
                 self._filling_condition.wait()
 
-            # cycle queue
-            self._host_queue.put(hostname)
+        # cycle queue
+        self._host_queue.put(hostname)
 
-            self.put_new_list(self._new_list_holder)
+        # checking if new list is available
+        self.put_new_list(self._new_list_holder)
 
-            # keep track by counting
-            self._counter += 1
+        # keep track by counting
+        self._counter += 1
 
-            # Keep track of how many times the host_queue has been "parsed" by sslyze
-            if self._counter == len(self._host_queue.queue):
-                self._counter = 0
-                self._times_fully_parsed +=1
+        # Keep track of how many times the host_queue has been "parsed" by sslyze
+        if self._counter == self._host_queue.qsize():
+            self._counter = 0
+            self._times_fully_parsed += 1
 
-            #print("The position counter:", self._counter," Times fully parsed: ",self._times_fully_parsed)
-            return hostname, None
+        return hostname, None
 
     def empty_queue(self):
         """
@@ -202,11 +147,12 @@ class QueueManager(object):
         self._user_result_dict[user_id] = Queue()
         self._user_queue.put((user_request, user_id))
 
-    def put_new_list(self, new_list):
+    def put_new_list(self, new_list, from_dump=False):
         """
         Empty and refill the queue.
 
         :param list new_list: nested list with hostname and source e.g. [ ["google.com", ["alexa-top-1m", ] ], ]
+        :param bool from_dump: should be set to True if function call is used to fill the queue from dump
         """
 
         self._new_list_holder = new_list
@@ -219,6 +165,10 @@ class QueueManager(object):
         if self._counter > 0 or self._times_fully_parsed == 0:
             return
 
+        # dump
+        if not from_dump:
+            Dumper.dump_queue(self._new_list_holder)
+
         print("adding new list ...")
         # indicates that the queue will be filled currently
         self._is_filling = True
@@ -226,8 +176,6 @@ class QueueManager(object):
         self.empty_queue()  # self_counter is reset to 0 in here
 
         for i, item in enumerate(new_list):
-            if (i % 10000) == 0 and i > 0:
-                print("%s domains added" % i)
             self._host_source_dict[item[0]] = item[1]
             self._host_queue.put(item[0])
 
@@ -278,18 +226,9 @@ class QueueManager(object):
         Adding a result to result_queue.
         :param result: the sslyze result to pe added to the _result.queue
         """
+        # set start time when first result has finished
         if self._result_counter == 1:
             self._start_time = time()
-
-        exec_time = time() - self._start_time
-
-        print("#"*50)
-        print('scan completed for target:     %s' % result.get("target")[0])
-        print('total scans completed:         %s' % self._result_counter)
-        print('average scan time per target: {0:.2f} s'.format(exec_time/self._result_counter))
-        print('total scan time: {0:.2f} m'.format(exec_time/60))
-        print('result_queue size: %s' % self._result_queue.qsize())
-        print("#"*50)
 
         self._result_counter += 1
         self._result_queue.put(result)
@@ -305,6 +244,23 @@ class QueueManager(object):
         """
         _inner_result_queue = self._user_result_dict[user_id]
         _inner_result_queue.put(result)
+
+    def status(self):
+        exec_time = time() - self._start_time
+        status_dict = dict(
+            host_queue_size=self._host_queue.qsize(),
+            counter=self._counter,
+            completed=self._result_counter-1,
+            scantime=exec_time,
+            avgtime=exec_time/self._result_counter,
+            result_queue_size=self._result_queue.qsize(),
+            user_queue_size=self._user_queue.qsize(),
+            dump_limit=self._dump_threshold,
+            result_queue_limit=self._result_queue_threshold,
+            is_filling=self._is_filling,
+            fully_scanned=self._times_fully_parsed
+        )
+        return status_dict
 
 
 class QueueClient(BaseManager):
