@@ -34,10 +34,11 @@ class QueueManager(object):
             Instead use :class:`~queue_manager.QueueClient` to connect to the :class:`~queue_manager.QueueServer`
             and get an instance of this class.
     """
+
     def __init__(self):
 
         # Threshold value describing intervals in which dumps will be created
-        self._dump_threshold = 10
+        self._dump_threshold = 500
 
         # Threshold for result_queue size
         self._result_queue_threshold = 500
@@ -248,17 +249,17 @@ class QueueManager(object):
     def status(self):
         exec_time = time() - self._start_time
         status_dict = dict(
-            host_queue_size=self._host_queue.qsize(),
-            counter=self._counter,
-            completed=self._result_counter-1,
-            scantime=exec_time,
-            avgtime=exec_time/self._result_counter,
-            result_queue_size=self._result_queue.qsize(),
-            user_queue_size=self._user_queue.qsize(),
-            dump_limit=self._dump_threshold,
-            result_queue_limit=self._result_queue_threshold,
-            is_filling=self._is_filling,
-            fully_scanned=self._times_fully_parsed
+                host_queue_size=self._host_queue.qsize(),
+                counter=self._counter,
+                completed=self._result_counter - 1,
+                scantime=exec_time,
+                avgtime=exec_time / self._result_counter,
+                result_queue_size=self._result_queue.qsize(),
+                user_queue_size=self._user_queue.qsize(),
+                dump_limit=self._dump_threshold,
+                result_queue_limit=self._result_queue_threshold,
+                is_filling=self._is_filling,
+                fully_scanned=self._times_fully_parsed
         )
         return status_dict
 
@@ -285,9 +286,9 @@ class QueueClient(BaseManager):
         # do something with queue_manager ...
 
     """
+
     def __init__(self, address=(settings.SERVER_ADDRESS, settings.SERVER_PORT),
                  authkey=settings.SERVER_AUTH):
-
         self.register('queue_manager')
         BaseManager.__init__(self, address=address, authkey=authkey)
         self.connect()
@@ -297,6 +298,7 @@ class QueueServer(BaseManager):
     """
     The QueueServer ...
     """
+
     def __init__(self):
         self.register('queue_manager', callable=QueueManager())
         BaseManager.__init__(self, address=(settings.SERVER_ADDRESS, settings.SERVER_PORT),
