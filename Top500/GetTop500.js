@@ -59,11 +59,11 @@ function CreateLinks(){
              pattern[j] = pattern1 + j + pattern2 + cnt;
         }
 
-        pattern.forEach(function(patt){
+        pattern.forEach(function(countryLink){
              ctrr2++;
             setTimeout(function()
             {
-            request(patt, function (error, response, body) {
+            request(countryLink, function (error, response, body) {
                 if (!error && response.statusCode == 200) {
                     var $ = cheerio.load(body);
                     var a = $('.desc-paragraph').each(function(i,ele)
@@ -77,7 +77,7 @@ function CreateLinks(){
                         });
                     });
                     console.log("Reading country: " + cnt);
-                    console.log("Reading country link: " + patt);
+                    console.log("Reading country link: " + countryLink);
                     console.log("");
                 }});
             },100*ctrr2);});
