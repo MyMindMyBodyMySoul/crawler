@@ -137,17 +137,22 @@ class DownLoader():
         self.url = url
         self.contents = ''
 
-    def download(self):
+    def download(self, n_retries=5):
         """
         Creates a browser to get all necessary information. This information will be stored in self.contents
         :return: NULL
         """
 
         #print self.url
-        browser = urllib.urlopen(self.url)
-        response = browser.getcode()
-        if response == 200: #success
-            self.contents = browser.read()
+        try:
+            browser = urllib.urlopen(self.url)
+            response = browser.getcode()
+            if response == 200: #success
+                self.contents = browser.read()
+        except Exception as e:
+            if n_retries > 0:
+                self.download(n_retries-1)
+
 
 
 class alexaParser(DownLoader):
