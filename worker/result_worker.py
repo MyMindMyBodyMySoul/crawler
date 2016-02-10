@@ -43,6 +43,13 @@ class Database(object):
 
 
 def _parse_cert(command_result):
+    """
+    This method parses the result of the certinfo command.
+
+    :param command_result: The result of the certinfo command.
+    :return cert_dict: A dict with all the used information of the certificate.
+    """
+
     not_before = datetime.datetime.strptime(command_result['validity']['notBefore'], '%b %d %H:%M:%S %Y %Z')
     not_after = datetime.datetime.strptime(command_result['validity']['notAfter'], '%b %d %H:%M:%S %Y %Z')
     utc_ts = datetime.datetime.utcnow()
@@ -68,6 +75,13 @@ def _parse_cert(command_result):
 
 
 def _is_trusted(signed_result):
+    """
+    This Method checks whether the certificate is trusted.
+
+    :param signed_result: Signed dict out of the certinfo result.
+    :return trusted_result: True if the certificate is trusted by Google.
+    """
+
     trusted_result = dict(
             selfSigned=True,
             trusted=False
@@ -79,6 +93,15 @@ def _is_trusted(signed_result):
 
 
 def _parse_ciphers(result, protocol, public_key_size):
+    """
+    This Method parses the information of the tested cipher suites for one ssl protocol.
+
+    :param result: The result of ciphers for one protocol.
+    :param protocol: The ssl/tls version.
+    :param public_key_size: Used public key size for encryption.
+    :return ciphers_list: List with all the information of the checked cipher suites.
+    """
+
     ciphers_list = []
     key_status_list = [
         ('preferredCipherSuite', 'preferred'),
